@@ -1,3 +1,4 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -285,6 +286,7 @@ function pcardHTML(n){
 }
 function pminiHTML(n){const c=PC[n-1];return '<div class="mini" style="--c:'+PCOL[c.k]+'" title="'+esc(c.t)+'"><b>'+c.c+'</b><span>'+PICO[c.k]+'</span></div>'}
 function parseCode(raw){
+  const L=/[?&#](?:c|card)=([A-Za-z0-9]+)/.exec(String(raw||""));if(L)raw=L[1];
   const s=String(raw||"").toUpperCase().replace(/[^A-Z0-9]/g,"");let m=/([QGB])(\d{1,2})$/.exec(s),code="";
   if(m)code=m[1]+(+m[2]);else{m=/(\d{1,2})$/.exec(s);if(m)code=String(+m[1])}
   return PC.findIndex(c=>c.c===code)+1;
@@ -502,6 +504,7 @@ $("startBtn").onclick=()=>{
   S.title="Mission start";
   S.msg=S.mode==="phys"?"Roll the die, move, then enter the number on the card you draw.":"Roll the die. Your piece moves and a card is drawn automatically.";
   showPlay();render();
+  if(S.pendingCard&&S.mode==="phys"){const pc=S.pendingCard;S.pendingCard=null;play(pc)}
 };
 $("contBtn").onclick=()=>{showPlay();render()};
 function hardReset(){
@@ -518,6 +521,16 @@ $("resetBtn").onclick=()=>{
 };
 $("end").addEventListener("click",e=>{if(e.target.id==="endNew")hardReset()});
 renderTitle();loadNasa();
+/* opened from a card's QR link (…?c=12): show that card in the running physical game, or hold it for the next one */
+(function(){
+  let p="";try{const u=new URL(location.href);p=u.searchParams.get("c")||u.searchParams.get("card")||(/[#&]c=([A-Za-z0-9]+)/.exec(u.hash)||[])[1]||""}catch(e){}
+  if(!p||!parseCode(p))return;
+  if(S.started&&S.mode==="phys"&&!S.over){showPlay();render();play(p)}
+  else if(!S.started||S.over){S.pendingCard=p;S.pick="phys";S.setup=S.setup||{nt:1,sizes:[1,1]};$("startBtn").onclick()}  /* a card link starts a physical mission and shows the card */
+  else{S.pendingCard=p;const m=document.createElement("p");m.textContent="Card "+PC[parseCode(p)-1].c+" scanned. Start a Physical board game mission and it will open.";m.style.cssText="font-weight:600;max-width:420px";$("titlescreen").insertBefore(m,$("startBtn"))}
+})();
 </script>
 </body>
 </html>
+
+</body></html>
