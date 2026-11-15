@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mars Madness</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔴</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3ece4;--panel:#fffaf4;--ink:#2a1d16;--mute:#7a6558;--line:#e0d2c4;--ok:#1d8f6e;--warn:#c27a10;--bad:#c9382a;--btn:#2a1d16;--btnink:#fffaf4;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17110e;--panel:#241b16;--ink:#f1e5d6;--mute:#a8917f;--line:#3a2c24;--ok:#5fd0a8;--warn:#f2a93b;--bad:#ff6b57;--btn:#f1e5d6;--btnink:#17110e}}
+:root[data-theme="dark"]{--bg:#17110e;--panel:#241b16;--ink:#f1e5d6;--mute:#a8917f;--line:#3a2c24;--ok:#5fd0a8;--warn:#f2a93b;--bad:#ff6b57;--btn:#f1e5d6;--btnink:#17110e}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "IBM Plex Sans",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:16px}
+h1,h2,h3,.num{font-family:"Chakra Petch","Arial Narrow",sans-serif}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px}
+header h1{font-size:15px;margin:0 0 4px;color:var(--mute);font-weight:600}
+.day{font:700 56px/1 "Chakra Petch",sans-serif;letter-spacing:-1px}.day small{font-size:20px;color:var(--mute);font-weight:600;letter-spacing:0}
+#whose{font-size:18px;color:var(--mute);text-align:right}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:10px 12px;min-height:44px}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+.primary{background:var(--btn);color:var(--btnink);border-color:var(--btn);font-weight:600;width:100%;font-size:18px}
+.ts{min-height:80vh;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:14px}
+.ts h1{font:700 clamp(52px,17vw,100px)/.95 "Chakra Petch",sans-serif;margin:0;letter-spacing:-2px}
+.ts>p{font-size:19px;color:var(--mute);margin:0;max-width:30ch}
+.planet{width:88px;height:88px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#e8955f,#b0472b 58%,#5b2314)}
+.modes{display:grid;gap:8px;width:100%;max-width:420px}
+.mode{text-align:left;padding:12px 14px}.mode b{display:block;font:700 18px "Chakra Petch",sans-serif}.mode span{color:var(--mute);font-size:14px}
+.mode[aria-pressed=true]{background:var(--btn);color:var(--btnink)}.mode[aria-pressed=true] span{color:inherit;opacity:.8}
+.setup{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+.srow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;font-weight:600}.srow>span{min-width:120px}.srow em{color:var(--mute);font-size:13px;font-style:normal;font-weight:400}
+.srow button{min-width:44px}.srow button[aria-pressed=true]{background:var(--btn);color:var(--btnink)}
+.ts .setup p{font-size:14px;max-width:none;margin:0;color:var(--mute)}
+#startBtn,#contBtn{max-width:420px}
+.die{display:flex;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}.die>div:last-child{flex:1}.dief{font-size:76px;line-height:1;min-width:84px;text-align:center}#pos{color:var(--mute);margin-top:6px;font-size:14px}
+.start{display:flex;align-items:center;gap:6px;min-height:34px;padding:4px 8px;margin-bottom:6px;background:var(--panel);border:1px dashed var(--line);border-radius:10px;font:700 14px "Chakra Petch",sans-serif}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;max-width:640px}
+.cell{aspect-ratio:1;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px;display:flex;flex-wrap:wrap;align-content:flex-end;gap:2px;position:relative}
+.cell i{position:absolute;top:3px;left:5px;font:600 11px "IBM Plex Sans",sans-serif;font-style:normal;color:var(--mute)}
+.tok{width:20px;height:20px;border-radius:50%;color:#fff;font:700 12px/20px "Chakra Petch",sans-serif;text-align:center;box-shadow:0 0 0 2px var(--panel)}.tok.on{box-shadow:0 0 0 2px var(--ink)}
+#board{margin-bottom:12px}
+.manual{display:flex;gap:8px;margin-bottom:12px}.manual input{flex:1;min-width:0;font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink)}
+.status{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px}.status b{display:block;font:700 20px/1.2 "Chakra Petch",sans-serif}.status span{color:var(--mute);font-size:14px}
+.card{border:3px solid var(--c);border-radius:16px;background:var(--panel);overflow:hidden;max-width:380px;margin:0 0 12px}
+.ctop{background:var(--c);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:8px 14px}.cn{font:700 20px "Chakra Petch",sans-serif}.ci{font-size:46px;line-height:1}
+.cb{padding:12px 14px}.cb h3{margin:0 0 6px;font-size:20px;color:var(--c)}.cb p{margin:0}
+.lesson{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.lesson h3{margin:0 0 4px;font-size:16px}.lesson p{margin:0}
+.choice{display:block;width:100%;text-align:left;margin-top:8px;font-weight:600}.choice small{display:block;color:var(--mute);font-weight:500;margin-top:2px}.outcome{margin-top:12px;padding:10px;border-radius:10px;background:var(--panel);border:1px solid var(--line);font-weight:600}
+.piles{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:12px 0}.piles summary{cursor:pointer;font-weight:600;min-height:32px;display:flex;align-items:center}
+#pbody{display:flex;gap:12px;align-items:flex-start;margin-top:8px}
+.pile{text-align:center;font-size:13px;color:var(--mute)}.back{width:64px;height:92px;border-radius:8px;background:var(--ink);display:grid;place-items:center;color:var(--bg);font:700 11px "Chakra Petch",sans-serif;letter-spacing:1px;margin-bottom:4px}
+.disc{display:flex;flex-wrap:wrap;gap:6px;color:var(--mute);font-size:14px}
+.mini{width:42px;height:60px;border-radius:6px;border:2px solid var(--c);background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:2px;font-size:11px}.mini b{background:var(--c);color:#fff;width:100%;text-align:center;border-radius:3px}.mini span{font-size:20px}
+.ovr h2{font-size:20px;margin:14px 0 2px}.ovr p{margin:0 0 10px;color:var(--mute);font-size:14px}
+.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.team{background:var(--panel);border:1px solid var(--line);border-top:5px solid var(--tc);border-radius:12px;padding:12px}.team.act{outline:2px solid var(--tc)}.team.out{opacity:.6}
+.th{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.th h2{margin:0;font-size:20px;color:var(--tc)}.th span{font-size:13px;color:var(--mute)}
+.track{height:6px;background:var(--line);border-radius:3px;margin:8px 0;overflow:hidden}.track i{display:block;height:100%;background:var(--tc)}
+.rr{margin-bottom:10px}.rl{display:flex;justify-content:space-between;font-size:15px}
+.bar{height:10px;background:var(--line);border-radius:5px;margin:4px 0;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok);transition:width .25s}.low .bar i{background:var(--bad)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.steps button{padding:4px;min-height:34px;font-weight:600}
+.warn{font-weight:600;color:var(--bad);font-size:13px}
+.reset{margin-top:16px;width:100%;color:var(--mute)}
+.nasa{margin-top:12px;padding:10px 12px;border-left:4px solid var(--ok);background:var(--bg);border-radius:6px}.nasa h3{margin:0 0 4px;font-size:15px}.nasa p{margin:0 0 4px}.nasa small{color:var(--mute)}.nasa img{max-width:100%;border-radius:8px;margin-top:6px}
+.end{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.endbox{background:var(--panel);color:var(--ink);border-radius:16px;padding:20px;max-width:440px;width:100%}.endbox h2{margin:0 0 10px;font-size:28px;line-height:1.1}
+.endbox ul{list-style:none;padding:0;margin:0 0 16px}.endbox li{border-left:5px solid var(--tc);padding:6px 10px;margin-bottom:6px;background:var(--bg);border-radius:6px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<section class="ts" id="titlescreen">
+  <div class="planet" aria-hidden="true"></div><h1>Mars Madness</h1>
+  <p>Thirty days on Mars. Every decision costs something.</p>
+  <div class="modes" id="modes"></div><div id="setup" style="width:100%"></div>
+  <button class="primary" id="startBtn" disabled>Start mission</button>
+  <button id="contBtn" style="display:none;width:100%">Continue mission</button>
+</section>
+<div id="play" style="display:none">
+  <header><div><h1 id="modelbl">Mars Madness</h1><div class="day"><span id="dayn">0</span><small> / 30</small></div></div><div class="num" id="whose"></div></header>
+  <div class="die"><div class="dief" id="dief" aria-live="polite">⚀</div><div><button class="primary" id="rollBtn">Roll the die</button><div id="pos"></div></div></div>
+  <div id="board"></div>
+  <div class="manual" id="entry"><input id="code" type="text" inputmode="numeric" placeholder="Card number (1–30)" aria-label="Card number"><button id="goBtn">Show scenario</button></div>
+  <div class="status"><b id="stitle"></b><span id="smsg"></span></div>
+  <div id="card"></div>
+  <details class="piles" id="piles"><summary id="psum"></summary><div id="pbody"></div></details>
+  <div class="ovr"><h2>Manual override: Resource settings</h2><p id="ovrnote"></p></div>
+  <div class="teams" id="teams"></div>
+  <button class="reset" id="resetBtn">New mission</button>
+</div>
+</main>
+<div class="end" id="end" role="dialog" aria-modal="true" aria-label="Mission result"><div class="endbox" id="endbox"></div></div>
+<script>
+const CARDS=[
+"LIVING WITH THE SAME PEOPLE",
+"STAYING IN SHAPE",
+"MISSING SOCIETY AND FREEDOM",
+"SLEEP PROBLEMS",
+"HABITAT AIR LEAK",
+"NO AIR!",
+"FUNGUS ON PLANTS",
+"RUNNING OUT OF FOOD",
+"FROZEN WATER PIPE",
+"KEEP CLEAN",
+"TECHNICAL DIFFICULTIES",
+"POWER PROBLEMS",
+"METEORITE DAMAGE",
+"BROKEN HAZARD EQUIPMENT",
+"EXTREME TEMPERATURES ON MARS",
+"EARTH DOESN’T ANSWER IN AN EMERGENCY",
+"COMMUNICATION DELAYS",
+"EXTREME TEMPERATURES IN SPACE",
+"ALL SYSTEMS NORMAL",
+"ALL SYSTEMS NORMAL",
+"ALL SYSTEMS NORMAL",
+"ALL SYSTEMS NORMAL",
+"SUPPLY DROP FROM EARTH",
+"SOLAR PANELS WORKING WELL",
+"SUCCESSFUL GREENHOUSE HARVEST",
+"GOOD NEWS FROM HOME",
+"ICE DISCOVERY",
+"EARTH LINK OPENS",
+"SYSTEM UPGRADE",
+"QUIET SUN"];
+
+const id=n=>"CARD"+String(n+1).padStart(2,"0");
+const ix=n=>n<=18?n-1:n<=22?18:n-4;
+const LESSON=[
+"NASA’s OSDR archive collects space biology experiments, because living in space changes bodies and routines in ways teams must understand. Small stresses add up in a closed habitat. When you decide, protect the team before you try to win the argument.",
+"NASA’s OSDR archive holds many studies on how low gravity affects muscle and bone, and exercise is how crews push back. When you decide, protect health routines even on busy days.",
+"NASA’s EPIC camera photographs the whole sunlit Earth from deep space, a view of home that crews share with each other. When you decide, keep the crew connected and let people talk about how they feel.",
+"InSight’s weather reports were counted in sols, Mars days that run about 40 minutes longer than Earth days, so crews on Mars shift their sleep to match. Tired people make mistakes. When you decide, rest before risky jobs.",
+"InSight’s weather station measured Mars air pressure, a tiny fraction of Earth’s, so a leaking habitat loses air toward the thin outside. Crews find the source, isolate the section and watch the pressure. When you decide, protect the air first.",
+"NASA’s InSight data shows how thin the Martian air is, which is why every habitat depends on its own oxygen. Crews rehearse emergencies until the steps are automatic. When you decide, get people to safety first and equipment second.",
+"NASA’s OSDR archive includes experiments on how plants and microbes behave in spaceflight, and mold spreads quickly in closed habitats. When you decide, act early and never rely on a single food source.",
+"OSDR holds space plant-growth experiments aimed at feeding future crews, but missions still plan food with a safety margin. When you decide, ration early and evenly instead of waiting until supplies are gone.",
+"InSight’s weather station recorded Martian air temperatures far below freezing, so heaters and water lines need protection. When you decide, protect your water first, thaw carefully, then conserve.",
+"InSight measured Martian wind, which lifts fine dust that settles on gear and clogs filters. When you decide, small cleaning habits prevent bigger health and equipment problems.",
+"NASA’s DONKI database lists every instrument that detected each space-weather event, because a reading is trusted when several instruments agree. When you decide, check more than one source before you fix.",
+"InSight’s mission ended in December 2022 when the lander ran out of power, and before that it cut back measurements to stretch what it had. When you decide, keep life support running and switch off the extras.",
+"NASA’s NeoWs service tracks near-Earth asteroids and flags the ones that are potentially hazardous, which gives time to prepare. When you decide, inspect first, seal second and repair third.",
+"NeoWs flags potentially hazardous objects so people can prepare, but a warning only helps if the alarms work. When you decide, fix safety equipment first and never skip a safety check.",
+"InSight recorded air temperatures changing by tens of degrees Celsius within a single Martian day, so crews plan outdoor work around the weather. When you decide, wait out dangerous cold and avoid unnecessary risks.",
+"NASA’s DONKI database logs solar flares and geomagnetic storms, which can disrupt radio links, so a crew may have to act alone. When you decide, rely on your training and checklist, then report afterward.",
+"DONKI shows how one solar flare can be followed by a coronal mass ejection, a shock and a storm days later, while messages between Mars and Earth already take minutes. When you decide, send clear, complete messages and keep working.",
+"NASA’s DONKI database tracks solar flares, and spacecraft face strong sunlight on one side and deep shade on the other, so thermal systems manage the swings. When you decide, protect people first and handle heat and cold together.",
+"NASA’s Astronomy Picture of the Day is a daily reminder that calm days are for looking up and preparing. Crews use quiet time to inspect, maintain, rest and train. Use calm days to recover and prepare for the next problem.",
+"Space-weather records in NASA’s DONKI database help planners pick calmer times for risky operations like landings. A resupply is a gift, not a plan. When you decide, restock what keeps the crew alive first.",
+"InSight ran on solar panels, and its power limits shaped how often it could measure Mars weather. A good power day is a chance to catch up. When you decide, rebuild reserves before you spend them.",
+"NASA’s OSDR archive includes plant-growth experiments, because fresh food supports health and morale on long missions. When you decide, share some of a good harvest now and save some for later.",
+"NASA’s Astronomy Picture of the Day and EPIC views of Earth remind crews of home. Good news lifts morale, but the boost fades. When you decide, use good days to build resilience.",
+"NASA’s Mars Trek mapping service lets scientists study Mars terrain, and finding water ice is a top priority for future crews. When you decide, think about what you will need most later, not only today.",
+"NASA’s DONKI database tracks the space weather that can disturb radio links, so a clear link is worth using well. When you decide, spend a good connection on what you can only get from Earth.",
+"NASA publishes open APIs so anyone can build tools from real mission data, and shared tools make crews and engineers better at their jobs. When you decide, put an upgrade where the crew is weakest.",
+"DONKI logs solar flares, and when the Sun is quiet crews can plan outdoor work with less worry about radiation. When you decide, use quiet-Sun days for work that is dangerous in a storm."];
+
+const DESC=[
+"Weeks into the mission, small habits are starting to grate. Tools get left out, someone is always loud, and tempers are short in the cramped habitat.",
+"Low gravity is making everyone feel weaker. The exercise gear is ready, but the repair list is long and there is little spare time.",
+"The crew is lonely. Everyone misses family, friends and open skies, and the days all feel the same inside the habitat walls.",
+"The habitat is noisy, the lights stay on, and a Martian day runs a little longer than an Earth day. Crew members are lying awake and getting tired.",
+"An alarm sounds. Air pressure in one module is slowly dropping, and a faint hiss is coming from somewhere near the wall.",
+"The oxygen alarm blares as levels fall fast. The crew has only minutes to act before breathing gets difficult.",
+"White fuzzy mold is spreading across the vegetable crop. If it keeps going, the garden that feeds the crew could be lost.",
+"A count of the pantry shows less food than planned. The next supply ship is months away, so the crew must decide how to stretch what is left.",
+"A freezing night has frozen part of the water line, and water has stopped flowing into the habitat tanks.",
+"Red dust is on everything and there is no shower. Dirty filters and surfaces have the crew worried about germs.",
+"A key system crashes and the control panel fills with error codes. Nobody is sure what is wrong, and the crew has to decide how to fix it.",
+"The solar panels are producing less power than expected, and the batteries are draining faster than planned.",
+"A loud bang echoes through the habitat. A small meteorite has hit the outer wall, and the crew does not know how far the damage goes.",
+"During a routine check the crew finds a dead alarm and a cracked helmet visor. The gear meant to keep them safe cannot be trusted.",
+"A bitter cold snap hits the surface. The habitat heaters struggle, and going outside is dangerous.",
+"An emergency strikes and the crew calls Mission Control. There is no reply, and every minute counts.",
+"A message to Earth takes many minutes each way. The crew needs advice now, but there can be no real conversation.",
+"In flight, the sunlit side of the ship is overheating while the shaded side freezes, and some systems start acting strangely.",
+"A quiet day. Every system reads normal and nothing needs urgent attention. It is a chance to catch your breath.",
+"A cargo lander from Earth touches down near the habitat. The crew has time to unpack one crate first.",
+"The dust clears and the solar panels are producing more power than planned. The crew can decide how to use the surplus.",
+"The greenhouse produces a bigger harvest than anyone expected. The crew can decide how to use it.",
+"Mission Control sends a message full of good news and notes from family and friends. Morale soars.",
+"A rover scan finds a patch of buried ice close to the habitat.",
+"The Earth link is clear and strong, so the crew can talk live with Mission Control.",
+"A software update from Earth makes the recycling and power systems more efficient.",
+"Forecasters report a very quiet Sun, so the crew can plan outdoor work with little radiation worry."];
+
+function lessonHTML(n){return '<div class="lesson"><h3>NASA life lesson</h3><p>'+LESSON[ix(n)]+'</p></div>'}
+const CHOICES=[
+[["Hold a crew meeting and rebalance chores",{"crew":10,"safety":-5}],["Ignore it and keep working",{"safety":5,"crew":-10}],["Set up separate quiet hours",{"crew":5,"power":-5}]],
+[["Do the full exercise routine",{"crew":10,"food":-5}],["Skip exercise to finish repairs",{"safety":5,"crew":-10}],["Do a short workout and keep repairing",{"crew":5,"safety":-5}]],
+[["Use power for a video call to Earth",{"crew":10,"power":-10}],["Save power and stay quiet",{"power":5,"crew":-10}],["Hold a crew movie night",{"crew":5,"power":-5}]],
+[["Enforce a full rest shift",{"crew":10,"safety":-5}],["Work through the night",{"safety":10,"crew":-10}],["Sleep in two shifts so someone is always on watch",{"safety":5,"crew":-5}]],
+[["Patch the leak now with emergency sealant",{"oxygen":10,"power":-10}],["Seal off the module and abandon it",{"safety":5,"oxygen":-10}],["Plug it with spare supplies and watch the pressure",{"oxygen":5,"safety":-5}]],
+[["Switch to emergency oxygen tanks",{"oxygen":15,"safety":-10}],["Start the backup air scrubber",{"oxygen":10,"power":-10}],["Move everyone into the smallest sealed room",{"oxygen":5,"crew":-5}]],
+[["Cut out and burn the infected plants",{"safety":5,"food":-10}],["Treat the plants and keep growing",{"food":5,"water":-10}],["Isolate the plants and test a sample",{"safety":5,"water":-5}]],
+[["Strict rations for everyone",{"food":10,"crew":-10}],["Open the emergency food reserve",{"food":15,"safety":-10}],["Ask Earth for a faster supply plan",{"food":5,"power":-5}]],
+[["Heat the pipe back up",{"water":10,"power":-10}],["Shut the pipe off and use stored water",{"safety":5,"water":-10}],["Wrap the pipe and thaw it slowly",{"water":5,"power":-5}]],
+[["Do a full cleaning day",{"safety":10,"water":-10}],["Wipe down quickly and move on",{"water":5,"safety":-10}],["Clean the air filters only",{"safety":5,"crew":-5}]],
+[["Run full diagnostics before fixing",{"safety":10,"power":-10}],["Try a quick patch",{"power":5,"safety":-10}],["Ask Earth for help with the repair",{"safety":5,"crew":-5}]],
+[["Switch off non-essential systems",{"power":10,"crew":-5}],["Keep everything running",{"crew":5,"power":-10}],["Switch to the backup generator",{"power":5,"safety":-5}]],
+[["Inspect the whole hull, then seal",{"safety":10,"power":-5}],["Seal the loudest leak and move on",{"oxygen":10,"safety":-10}],["Cover the damage with a temporary patch",{"oxygen":5,"power":-5}]],
+[["Repair alarms and suits first",{"safety":15,"power":-10}],["Finish chores and fix safety gear later",{"power":5,"safety":-10}],["Test only the suits",{"safety":5,"crew":-5}]],
+[["Stay inside and heat the habitat",{"safety":10,"power":-5}],["Go out to harvest ice for water",{"water":10,"safety":-10}],["Send one rover out to check conditions",{"water":5,"power":-5}]],
+[["Follow the emergency checklist yourselves",{"safety":10,"crew":-5}],["Wait for Earth to reply",{"crew":5,"safety":-10}],["Split the crew: half follow the checklist, half try Earth",{"safety":5,"crew":-5}]],
+[["Send one detailed message and keep working",{"safety":10,"power":-5}],["Wait by the radio",{"power":5,"safety":-10}],["Send a short update and check back later",{"crew":5,"safety":-5}]],
+[["Run the heating and cooling systems",{"safety":10,"power":-10}],["Add extra layers and save power",{"power":5,"crew":-10}],["Rotate the ship to shade the hot side",{"power":5,"safety":-5}]],
+[["Rest and recover",{"crew":10,"safety":-5}],["Do maintenance and safety checks",{"safety":10,"crew":-5}],["Take a short rest and fix one small thing",{"crew":5,"power":-5}]],
+[["Unpack the food crate",{"food":20,"safety":-5}],["Unpack the water crate",{"water":20,"safety":-5}],["Unpack the repair crate",{"safety":15,"food":-5}]],
+[["Charge the batteries",{"power":20,"crew":-5}],["Run the greenhouse lights and heaters",{"food":15,"power":-5}],["Power the air recyclers",{"oxygen":15,"power":-5}]],
+[["Store the harvest",{"food":20,"crew":-5}],["Hold a harvest feast",{"crew":20,"food":-5}],["Grow more with cuttings and compost",{"oxygen":10,"water":-5}]],
+[["Hold a crew celebration",{"crew":20,"food":-5}],["Use the energy to catch up on repairs",{"safety":15,"crew":-5}],["Rest and recover",{"crew":15,"power":-5}]],
+[["Melt the ice for drinking water",{"water":20,"power":-5}],["Split the ice into oxygen",{"oxygen":20,"power":-5}],["Keep it as an emergency reserve",{"water":10,"oxygen":10,"safety":-5}]],
+[["Ask experts for repair advice",{"safety":15,"crew":-5}],["Hold a video call with families",{"crew":20,"power":-5}],["Get an updated supply plan",{"food":15,"power":-5}]],
+[["Upgrade the air system",{"oxygen":15,"safety":-5}],["Upgrade the power system",{"power":15,"crew":-5}],["Upgrade the water system",{"water":15,"power":-5}]],
+[["Do long outdoor repairs",{"safety":15,"crew":-5}],["Go out to collect ice",{"water":15,"power":-5}],["Tune up the radios",{"crew":15,"food":-5}]]];
+const TC=["#d6452d","#2f6fd6"],NAMES=["Team A","Team B"],FACES="⚀⚁⚂⚃⚄⚅";
+const MODES=[["phys","Physical board game","Use your own board and cards. The die and resources are digital."],["online","All-online","Board, cards and pieces all on screen, for one or two teams."],["solo","Solo","A game for one player with the full online board."]];
+const ICO=[
+["👥","#8e5bd6"],
+["🏋️","#8e5bd6"],
+["🌍","#8e5bd6"],
+["😴","#8e5bd6"],
+["💨","#2f6fd6"],
+["🆘","#c9382a"],
+["🍄","#1f9a68"],
+["🥫","#1f9a68"],
+["🧊","#1b8fa0"],
+["🧼","#1b8fa0"],
+["🔧","#b8720c"],
+["🔋","#b8720c"],
+["☄️","#c9382a"],
+["🚨","#c9382a"],
+["🥶","#4f86c6"],
+["📡","#148f8f"],
+["⏳","#148f8f"],
+["🔥","#d9622b"],
+["✅","#1f9a68"],
+["🚀","#1f9a68"],
+["☀️","#b8720c"],
+["🥬","#1f9a68"],
+["💌","#8e5bd6"],
+["🧊","#1b8fa0"],
+["🛰️","#148f8f"],
+["💻","#8e5bd6"],
+["🌞","#b8720c"]];
+const RES=[["oxygen","Oxygen","OXYGEN CRITICAL!"],["water","Water","WATER CRITICAL!"],["food","Food","FOOD CRITICAL!"],["power","Power","POWER CRITICAL!"],["safety","Safety","SAFETY CRITICAL!"],["crew","Crew health","CREW HEALTH CRITICAL!"]];
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const fresh=()=>({pick:null,setup:{nt:1,sizes:[1,1]},mode:null,started:false,over:false,winner:null,teams:[],turn:0,deck:[],num:0,picked:true,outcome:"",title:"",msg:"",last:0});
+let S=fresh();
+try{const t=localStorage.getItem("marsMadness");if(t)S=Object.assign(fresh(),JSON.parse(t))}catch(e){}
+const $=x=>document.getElementById(x);
+const save=()=>{try{localStorage.setItem("marsMadness",JSON.stringify(S))}catch(e){}};
+const T=()=>S.teams[S.turn];
+const locked=()=>S.teams.some(t=>t.day>=1);
+const cellOf=p=>p===0?0:((p-1)%30)+1;
+const ico=n=>ICO[ix(n)];
+const fx=e=>RES.filter(([k])=>e[k]).map(([k,n])=>(e[k]>0?'+':'−')+Math.abs(e[k])+' '+n).join(' · ');
+function cardHTML(n){const [e,c]=ico(n);return '<div class="card" style="--c:'+c+'"><div class="ctop"><span class="cn">Card '+n+(n>=23?' · Good news':isQ(n)?' · Quiet day':'')+'</span><span class="ci" aria-hidden="true">'+e+'</span></div><div class="cb"><h3>'+CARDS[n-1]+'</h3><p>'+DESC[ix(n)]+'</p></div></div>'}
+function miniHTML(n){const [e,c]=ico(n);return '<div class="mini" style="--c:'+c+'" title="Card '+n+': '+CARDS[n-1]+'"><b>'+n+'</b><span>'+e+'</span></div>'}
+function choiceHTML(){
+  if(S.picked)return S.outcome?'<div class="outcome">'+S.outcome+'</div>':'';
+  const set=CHOICES[ix(S.num)];
+  return '<div class="lesson"><h3>What does the crew do?</h3>'+set.map((o,k)=>'<button class="choice" data-c="'+k+'">'+o[0]+'<small>'+fx(o[1])+'</small></button>').join('')+'</div>';
+}
+function tokens(s){let h="";S.teams.forEach((t,i)=>t.pos.forEach((p,m)=>{if(cellOf(p)===s)h+='<span class="tok'+(i===S.turn&&m===t.mi?' on':'')+'" style="background:'+TC[i]+'" title="'+t.name+'">'+"AB"[i]+'</span>'}));return h}
+function boardHTML(){
+  let h='<div class="start">Start '+tokens(0)+'</div><div class="grid">';
+  for(let s=1;s<=30;s++){const r=Math.floor((s-1)/6),c=(s-1)%6,col=r%2?5-c:c;
+    h+='<div class="cell" style="grid-row:'+(r+1)+';grid-column:'+(col+1)+'"><i>'+s+'</i>'+tokens(s)+'</div>'}
+  return h+'</div>';
+}
+function teamHTML(t,i){
+  const off=locked()||S.over;
+  let h='<section class="team'+(i===S.turn&&!S.over?' act':'')+(t.out?' out':'')+'" style="--tc:'+TC[i]+'"><div class="th"><h2>'+t.name+'</h2><span>'+(t.out?'OUT · '+t.why:'Day '+t.day+' / 30')+' · '+t.size+(t.size>1?' members':' member')+'</span></div><div class="track"><i style="width:'+(t.day/30*100)+'%"></i></div>';
+  RES.forEach(([k,n,w])=>{const v=t.r[k],low=v<=t.max*0.2;
+    h+='<div class="rr'+(low?' low':'')+'"><div class="rl"><span>'+n+'</span><b>'+v+' / '+t.max+'</b></div><div class="bar"><i style="width:'+(v/t.max*100)+'%"></i></div><div class="steps">'+
+    [-10,-5,5,10].map(d=>'<button data-t="'+i+'" data-k="'+k+'" data-d="'+d+'" aria-label="'+t.name+' '+n+(d>0?' plus ':' minus ')+Math.abs(d)+'"'+(off?' disabled':'')+'>'+(d>0?'+':'−')+Math.abs(d)+'</button>').join('')+'</div>'+(low?'<div class="warn">'+w+'</div>':'')+'</div>'});
+  return h+'</section>';
+}
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let NASA={};
+const NMAP={"POWER PROBLEMS":"sun","EARTH DOESN’T ANSWER IN AN EMERGENCY":"sun","COMMUNICATION DELAYS":"sun","EXTREME TEMPERATURES IN SPACE":"sun","SUPPLY DROP FROM EARTH":"sun","EARTH LINK OPENS":"sun","QUIET SUN":"sun","METEORITE DAMAGE":"neo","EXTREME TEMPERATURES ON MARS":"insight","SOLAR PANELS WORKING WELL":"insight","ALL SYSTEMS NORMAL":"apod","GOOD NEWS FROM HOME":"apod"};
+const frank=c=>{const m=/^([A-Z])(\d+(?:\.\d+)?)/.exec(c||"");return m?"ABCMX".indexOf(m[1])*100+parseFloat(m[2]):-1};
+function nasaBox(n){
+  const d=NASA[NMAP[CARDS[n-1]]];if(!d)return"";
+  return '<div class="nasa"><h3>Real NASA data · '+d.head+'</h3><p>'+esc(d.text)+'</p>'+(/^https:/.test(d.img||"")?'<img src="'+esc(d.img)+'" alt="'+esc(d.alt)+'" onerror="this.remove()">':'')+'<small>'+d.src+'</small></div>';
+}
+async function nj(u){const r=await fetch(u);if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}
+async function loadNasa(){
+  const B="https://api.nasa.gov/",q="&api_key=DEMO_KEY";
+  const iso=d=>new Date(Date.now()-d*864e5).toISOString().slice(0,10),dr="startDate="+iso(30)+"&endDate="+iso(0);
+  const R=await Promise.allSettled([nj(B+"insight_weather/?feedtype=json&ver=1.0"+q),nj(B+"neo/rest/v1/feed?start_date="+iso(6)+"&end_date="+iso(0)+q),nj(B+"DONKI/FLR?"+dr+q),nj(B+"DONKI/GST?"+dr+q),nj(B+"planetary/apod?thumbs=true"+q)]);
+  const [ins,neo,flr,gst,apod]=R,v=x=>x.status==="fulfilled"?x.value:null,N={};
+  try{const j=v(ins),sk=j&&j.sol_keys||[],sol=sk[sk.length-1],s=j&&j[sol];
+    if(s&&s.AT)N.insight={head:"InSight Mars weather",text:"On sol "+sol+(s.Season?" ("+s.Season+")":"")+", InSight measured air temperatures from "+Math.round(s.AT.mn)+" °C to "+Math.round(s.AT.mx)+" °C"+(s.PRE?", with air pressure near "+Math.round(s.PRE.av)+" Pa":"")+". Crews plan every outdoor job around swings like this. (InSight stopped working in 2022, so these are its last recorded sols.)",src:"api.nasa.gov · InSight: Mars Weather"}}catch(e){}
+  try{const j=v(neo),all=[].concat(...Object.values(j&&j.near_earth_objects||{}));
+    if(all.length){const dm=o=>o.estimated_diameter.meters.estimated_diameter_max,km=o=>+o.close_approach_data[0].miss_distance.kilometers;
+      const big=all.reduce((a,b)=>dm(b)>dm(a)?b:a),near=all.reduce((a,b)=>km(b)<km(a)?b:a),haz=all.filter(o=>o.is_potentially_hazardous_asteroid).length;
+      N.neo={head:"near-Earth asteroids",text:"NASA tracked "+all.length+" near-Earth asteroids in the past week, and "+haz+(haz===1?" was":" were")+" flagged potentially hazardous. The largest, "+big.name+", is up to about "+Math.round(dm(big))+" m wide, and the closest ("+near.name+") passed about "+Math.round(km(near)).toLocaleString()+" km from Earth. Spotting hazards early gives crews time to prepare.",src:"api.nasa.gov · NeoWs"}}}catch(e){}
+  try{const fl=Array.isArray(v(flr))?v(flr):[],gs=Array.isArray(v(gst))?v(gst):[];
+    if(fl.length||gs.length){const top=fl.reduce((a,b)=>frank(b.classType)>frank(a.classType)?b:a,{classType:""}),kp=Math.max(0,...gs.flatMap(g=>(g.allKpIndex||[]).map(k=>+(k.kpIndex!==undefined?k.kpIndex:k.KpIndex)||0)));
+      N.sun={head:"space weather",text:"In the past 30 days NASA logged "+fl.length+" solar flares"+(top.classType?" (strongest: class "+top.classType+")":"")+" and "+gs.length+" geomagnetic storm"+(gs.length===1?"":"s")+(kp?" (peak Kp "+kp+")":"")+". Space weather can disturb power systems and radio links, so crews watch it closely.",src:"api.nasa.gov · DONKI"}}}catch(e){}
+  try{const a=v(apod);
+    if(a&&a.title)N.apod={head:"Astronomy Picture of the Day",text:a.title+". "+String(a.explanation||"").split(". ").slice(0,2).join(". "),img:a.media_type==="image"?a.url:a.thumbnail_url,alt:a.title,src:"api.nasa.gov · APOD ("+a.date+")"}}catch(e){}
+  NASA=N;
+  render();
+}
+function endHTML(){
+  const w=S.winner,multi=S.teams.length>1,sc=t=>RES.reduce((a,[k])=>a+t.r[k],0);
+  const head=w!==null?(multi?(S.tie?"It’s a tie! Both teams survived 30 days with the same score.":S.teams.filter(x=>x.done).length>1?S.teams[w].name+" wins on score! Both teams survived 30 days.":S.teams[w].name+" survived 30 days first!"):"Mission complete! You survived 30 days."):(multi?"No team survived.":"Mission failed.");
+  return '<h2>'+head+'</h2><ul>'+S.teams.map((t,i)=>'<li style="--tc:'+TC[i]+'"><b>'+t.name+'</b> · '+(t.out?'out on day '+t.day+' ('+t.why+')':'day '+t.day+' of 30')+' · score '+sc(t)+' ('+Math.round(100*sc(t)/(6*t.max))+'% of max)</li>').join('')+'</ul><button class="primary" id="endNew">New mission</button>';
+}
+function render(){
+  if(!S.started)return;
+  const t=T(),ph=S.mode==="phys",me=t.pos[t.mi];
+  $("modelbl").textContent="Mars Madness · "+MODES.find(m=>m[0]===S.mode)[1];
+  $("dayn").textContent=t.day;
+  $("whose").textContent=S.teams.length>1?t.name+"’s turn":"";
+  $("board").style.display=ph?"none":"block";$("entry").style.display=ph?"flex":"none";
+  $("pos").textContent=(S.teams.length>1?t.name+"’s turn · ":"")+(ph?"":"Space "+cellOf(me)+(me>30?" · lap "+(Math.floor((me-1)/30)+1):"")+" · ")+(S.last?"last roll "+S.last:"no rolls yet");
+  $("dief").textContent=FACES[S.last?S.last-1:0];
+  $("stitle").textContent=S.title;$("smsg").textContent=S.msg;
+  $("card").innerHTML=S.num?cardHTML(S.num)+lessonHTML(S.num)+nasaBox(S.num)+choiceHTML():"";
+  if(!ph)$("board").innerHTML=boardHTML();
+  $("psum").textContent="Cards & discards"+(S.teams.length>1?" · "+t.name:"")+" · "+(ph?"":(S.deck.length-t.dp)+" in deck · ")+t.used.length+" discarded";
+  $("pbody").innerHTML=(ph?"":'<div class="pile"><div class="back">MARS</div>'+(S.deck.length-t.dp)+' left</div>')+'<div class="disc">'+(t.used.length?t.used.map(miniHTML).join(""):'No discards yet')+'</div>';
+  $("ovrnote").textContent=locked()?"Locked. Resources now change only through scenario choices.":"Set starting resources before day 1. This locks once the first scenario is resolved.";
+  $("teams").innerHTML=S.teams.map(teamHTML).join("");
+  $("end").style.display=S.over?"flex":"none";if(S.over)$("endbox").innerHTML=endHTML();
+  save();
+}
+function nextTurn(){
+  let k=S.turn,c=0;do{k=(k+1)%S.teams.length;c++}while((S.teams[k].out||S.teams[k].done)&&c<S.teams.length);
+  S.turn=k;
+}
+const DRAIN=2,isQ=n=>n>=19&&n<=22;
+function settle(o){
+  const t=T();
+  if(o)RES.forEach(([key])=>{const d=o[1][key];if(d)t.r[key]=Math.max(0,Math.min(t.max,t.r[key]+d))});
+  RES.forEach(([key])=>{t.r[key]=Math.max(0,t.r[key]-DRAIN)});
+  t.day++;t.used.push(S.num);S.picked=true;
+  S.outcome=(o?(S.teams.length>1?t.name+' chose ':'You chose ')+'“'+o[0]+'”: '+fx(o[1])+' · ':'A quiet day: no decisions to make. ')+'Daily use: −'+DRAIN+' of every resource.';
+  const z=RES.find(([key])=>t.r[key]===0);
+  if(z){t.out=true;t.why=z[1]+" ran out"}
+  if(!t.out&&t.day>=30)t.done=true;
+  const sc=x=>RES.reduce((a,[k])=>a+x.r[k],0)/(6*x.max),fin=S.teams.map((x,i)=>i).filter(i=>S.teams[i].done);
+  if(S.teams.every(x=>x.out))S.over=true;
+  else if(fin.length&&!S.teams.some((x,i)=>i>S.turn&&!x.out&&!x.done))S.over=true;
+  if(S.over&&fin.length){const top=Math.max(...fin.map(i=>sc(S.teams[i])));const ws=fin.filter(i=>sc(S.teams[i])===top);S.winner=ws[0];S.tie=ws.length>1}
+  if(!S.over)nextTurn();
+  S.msg=(t.out?t.name+" is out: "+t.why+". ":t.done?t.name+" survived 30 days! ":"Day complete. ")+(S.over?"":(S.teams.length>1?T().name+" is up: roll the die.":"Roll the die for your next turn."));
+}
+function choose(k){
+  if(!S.num||S.picked||S.over||isQ(S.num))return;
+  settle(CHOICES[ix(S.num)][k]);render();
+}
+function draw(t){const i=S.deck[t.dp];t.dp++;S.num=i+1;S.picked=false;S.outcome="";if(isQ(S.num))settle(null)}
+let rolling=false;
+$("rollBtn").onclick=()=>{
+  if(rolling||S.over||!S.started)return;
+  if(S.num&&!S.picked){S.msg="Choose an option for the current scenario first.";render();return}
+  rolling=true;
+  const iv=setInterval(()=>{$("dief").textContent=FACES[Math.floor(Math.random()*6)]},70);
+  setTimeout(()=>{clearInterval(iv);rolling=false;
+    const t=T(),n=1+Math.floor(Math.random()*6),ph=S.mode==="phys";
+    S.last=n;t.pos[t.mi]+=n;S.num=0;
+    S.title=(S.teams.length>1?t.name+" rolled a ":"You rolled a ")+n;
+    if(ph)S.msg="Move "+n+" space"+(n>1?"s":"")+" on your board, then enter the number on the card you draw.";
+    else{S.msg="Move "+n+" space"+(n>1?"s":"")+" to space "+cellOf(t.pos[t.mi])+". A card was drawn from the deck.";draw(t)}
+    render()},700);
+};
+function play(raw){
+  if(S.over||S.mode!=="phys")return;
+  const t=T(),m=String(raw||"").match(/\d+/),n=m?parseInt(m[0],10):0;
+  if(n<1||n>30){S.num=0;S.title="Unknown card";S.msg="Enter a card number from 1 to 30.";render();return}
+  if(t.used.includes(n)){S.num=0;S.title="Card already used!";S.msg="Card "+n+" was already played by "+t.name+".";render();return}
+  S.num=n;S.picked=false;S.outcome="";S.title="Card "+n;S.msg="Read the scenario, then choose how your crew responds.";if(isQ(n))settle(null);render();
+}
+$("goBtn").onclick=()=>{play($("code").value);$("code").value=""};
+$("code").addEventListener("keydown",e=>{if(e.key==="Enter")$("goBtn").click()});
+$("card").addEventListener("click",e=>{const b=e.target.closest("[data-c]");if(b)choose(+b.dataset.c)});
+$("teams").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-d]");if(!b||locked()||S.over)return;
+  const t=S.teams[+b.dataset.t],k=b.dataset.k;
+  t.r[k]=Math.max(0,Math.min(t.max,t.r[k]+ +b.dataset.d));render();
+});
+/* title screen, start and reset */
+function renderTitle(){
+  $("modes").innerHTML=MODES.map(([m,n,d])=>'<button class="mode" data-m="'+m+'" aria-pressed="'+(S.pick===m)+'"><b>'+n+'</b><span>'+d+'</span></button>').join("");
+  let h="";
+  if(S.pick==="phys"||S.pick==="online"){const s=S.setup;
+    h='<div class="setup"><div class="srow"><span>Teams</span>'+[1,2].map(n=>'<button data-nt="'+n+'" aria-pressed="'+(s.nt===n)+'">'+n+'</button>').join("")+'</div>';
+    for(let i=0;i<s.nt;i++)h+='<div class="srow"><span style="color:'+TC[i]+'">'+NAMES[i]+' members</span>'+[1,2,3].map(n=>'<button data-sz="'+i+':'+n+'" aria-pressed="'+(s.sizes[i]===n)+'">'+n+'</button>').join("")+'<em>starts at '+(100+20*(s.sizes[i]-1))+' per resource</em></div>';
+    h+='<p>Each member beyond the first adds +20 to every resource’s starting level and maximum.</p></div>';
+  }
+  $("setup").innerHTML=h;
+  $("startBtn").disabled=!S.pick;
+  $("contBtn").style.display=(S.started&&!S.over)?"block":"none";
+}
+$("titlescreen").addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.m)S.pick=b.dataset.m;
+  else if(b.dataset.nt)S.setup.nt=+b.dataset.nt;
+  else if(b.dataset.sz){const [i,n]=b.dataset.sz.split(":");S.setup.sizes[+i]=+n}
+  else return;
+  renderTitle();
+});
+const showPlay=()=>{$("titlescreen").style.display="none";$("play").style.display="block";window.scrollTo(0,0)};
+$("startBtn").onclick=()=>{
+  if(!S.pick)return;
+  const solo=S.pick==="solo",nt=solo?1:S.setup.nt;
+  S.mode=S.pick;
+  S.teams=Array.from({length:nt},(_,i)=>{const size=solo?1:S.setup.sizes[i],max=100+20*(size-1),r={};RES.forEach(([k])=>r[k]=max);
+    return {name:solo?"Solo crew":NAMES[i],size,max,r,day:0,used:[],dp:0,pos:[0],mi:0,out:false,done:false,why:""}});
+  S.deck=shuffle(Array.from({length:30},(_,i)=>i));
+  S.turn=0;S.started=true;S.over=false;S.winner=null;S.num=0;S.picked=true;S.last=0;S.outcome="";
+  S.title="Mission start";
+  S.msg=S.mode==="phys"?"Roll the die, move, then enter the number on the card you draw.":"Roll the die. Your piece moves and a card is drawn automatically.";
+  showPlay();render();
+};
+$("contBtn").onclick=()=>{showPlay();render()};
+function hardReset(){
+  S=Object.assign(fresh(),{setup:S.setup});
+  rt=0;$("resetBtn").textContent="New mission";
+  $("end").style.display="none";$("play").style.display="none";$("titlescreen").style.display="";
+  renderTitle();save();window.scrollTo(0,0);
+}
+let rt=0;
+$("resetBtn").onclick=()=>{
+  if(rt){clearTimeout(rt);hardReset();return}
+  $("resetBtn").textContent="Tap again to confirm: this clears the game";
+  rt=setTimeout(()=>{rt=0;$("resetBtn").textContent="New mission"},4000);
+};
+$("end").addEventListener("click",e=>{if(e.target.id==="endNew")hardReset()});
+renderTitle();loadNasa();
+</script>
+</body>
+</html>
