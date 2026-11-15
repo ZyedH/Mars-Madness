@@ -65,6 +65,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.steps button{padding:4px;min-height:34px;font-weight:600}
 .warn{font-weight:600;color:var(--bad);font-size:13px}
 .reset{margin-top:16px;width:100%;color:var(--mute)}
+.nasa{margin-top:12px;padding:10px 12px;border-left:4px solid var(--ok);background:var(--bg);border-radius:6px}.nasa h3{margin:0 0 4px;font-size:15px}.nasa p{margin:0 0 4px}.nasa small{color:var(--mute)}.nasa img{max-width:100%;border-radius:8px;margin-top:6px}
 .end{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
 .endbox{background:var(--panel);color:var(--ink);border-radius:16px;padding:20px;max-width:440px;width:100%}.endbox h2{margin:0 0 10px;font-size:28px;line-height:1.1}
 .endbox ul{list-style:none;padding:0;margin:0 0 16px}.endbox li{border-left:5px solid var(--tc);padding:6px 10px;margin-bottom:6px;background:var(--bg);border-radius:6px}
@@ -84,7 +85,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
   <header><div><h1 id="modelbl">Mars Madness</h1><div class="day"><span id="dayn">0</span><small> / 30</small></div></div><div class="num" id="whose"></div></header>
   <div class="die"><div class="dief" id="dief" aria-live="polite">⚀</div><div><button class="primary" id="rollBtn">Roll the die</button><div id="pos"></div></div></div>
   <div id="board"></div>
-  <div class="manual" id="entry"><input id="code" type="text" inputmode="numeric" placeholder="Card number (1–30)" aria-label="Card number"><button id="goBtn">Show scenario</button></div>
+  <div class="manual" id="entry"><input id="code" type="text" inputmode="numeric" placeholder="Card number (1–34)" aria-label="Card number"><button id="goBtn">Show scenario</button></div>
   <div class="status"><b id="stitle"></b><span id="smsg"></span></div>
   <div id="card"></div>
   <details class="piles" id="piles"><summary id="psum"></summary><div id="pbody"></div></details>
@@ -95,111 +96,174 @@ button:disabled{opacity:.4;cursor:not-allowed}
 </main>
 <div class="end" id="end" role="dialog" aria-modal="true" aria-label="Mission result"><div class="endbox" id="endbox"></div></div>
 <script>
-const CARDS=["LIVING WITH THE SAME PEOPLE","STAYING IN SHAPE","MISSING SOCIETY AND FREEDOM","SLEEP PROBLEMS","HABITAT AIR LEAK","NO AIR!","FUNGUS ON PLANTS","RUNNING OUT OF FOOD","FOOD LIMITATIONS","FROZEN WATER PIPE","KEEP CLEAN","WATER MANAGEMENT","TECHNICAL DIFFICULTIES","LIMITED RESOURCES","POWER PROBLEMS","METEORITE DAMAGE","BROKEN HAZARD EQUIPMENT","EXTREME TEMPERATURES ON MARS","EARTH DOESN’T ANSWER IN AN EMERGENCY","COMMUNICATION DELAYS","NAVIGATION PROBLEMS","EXTREME TEMPERATURES IN SPACE"];
-while(CARDS.length<30)CARDS.push("ALL SYSTEMS NORMAL");
+const CARDS=[
+"LIVING WITH THE SAME PEOPLE",
+"STAYING IN SHAPE",
+"MISSING SOCIETY AND FREEDOM",
+"SLEEP PROBLEMS",
+"HABITAT AIR LEAK",
+"NO AIR!",
+"FUNGUS ON PLANTS",
+"RUNNING OUT OF FOOD",
+"FROZEN WATER PIPE",
+"KEEP CLEAN",
+"TECHNICAL DIFFICULTIES",
+"POWER PROBLEMS",
+"METEORITE DAMAGE",
+"BROKEN HAZARD EQUIPMENT",
+"EXTREME TEMPERATURES ON MARS",
+"EARTH DOESN’T ANSWER IN AN EMERGENCY",
+"COMMUNICATION DELAYS",
+"EXTREME TEMPERATURES IN SPACE",
+"ALL SYSTEMS NORMAL",
+"ALL SYSTEMS NORMAL",
+"ALL SYSTEMS NORMAL",
+"ALL SYSTEMS NORMAL",
+"SUPPLY DROP FROM EARTH",
+"SOLAR PANELS WORKING WELL",
+"SUCCESSFUL GREENHOUSE HARVEST",
+"GOOD NEWS FROM HOME",
+"SUCCESSFUL REPAIR",
+"CLEAR SKIES",
+"ICE DISCOVERY",
+"EARTH LINK OPENS",
+"SYSTEM UPGRADE",
+"QUIET SUN",
+"CREW BIRTHDAY",
+"SAFE ASTEROID FLYBY"];
 const id=n=>"CARD"+String(n+1).padStart(2,"0");
+const ix=n=>n<=18?n-1:n<=22?18:n-4;
 const LESSON=[
-"Crews live for months in a small space with the same few people, and they train together for years first. Small irritations grow, so astronauts talk early, share chores fairly and give each other room. When you decide, protect the team before you try to win the argument.",
-"In low gravity muscles and bones weaken, so astronauts on the space station exercise about two hours a day. They treat it as part of the job, not a bonus. When you decide, keep health routines going even when the day is busy.",
-"Astronauts miss family, fresh air and privacy. They keep in touch with scheduled calls and messages, and they keep hobbies. Feeling isolated is expected, not a failure. When you decide, keep the crew connected and let people talk about how they feel.",
-"Sleep is hard in space: no real day and night, noise, and the odd feeling of floating. Crews keep fixed sleep times and dim the lights. Tired people make mistakes. When you decide, make sure everyone is rested before a risky job.",
-"A leak is one of the most serious problems a crew can face. They are trained to find the source, isolate that section and watch the air pressure. When you decide, protect the air first, fix the leak second and never panic.",
-"Astronauts rehearse emergencies again and again, so when one happens they follow steps they already know. Calm comes from practice. When you decide, get people to safety first and equipment second.",
-"Growing plants is real space research, and fresh food lifts a crew’s mood. But mold and plant disease are real risks in closed habitats. When you decide, act early so a small problem does not spread, and never rely on a single food source.",
-"Missions are planned with a safety margin of food, and nothing can be delivered quickly from Earth. Crews track what is left. When you decide, ration early and evenly instead of waiting until the supplies are gone.",
-"Space food is mostly packaged and repetitive, and eating takes planning. Variety and small treats matter for morale. When you decide, balance nutrition with a little variety so the crew stays healthy and motivated.",
-"Cold makes equipment fail, and water is life support. The space station recycles most of its water, even from sweat and breath moisture. When you decide, protect your water first, thaw and fix carefully, and then conserve.",
-"There are no showers on the space station. Astronauts use wipes and rinse-free soap, and cleaning is scheduled to keep air filters, surfaces and germs under control. When you decide, small hygiene habits prevent bigger health problems.",
-"Every drop of water in space is recycled and tracked. Crews measure how much they use and waste as little as possible. When you decide, conserve, recycle and keep a record so you know how much is really left.",
-"Equipment breaks, so astronauts are trained to be repair crews, and they work with engineers on the ground. They stop, diagnose, then fix. When you decide, understand the problem before acting and repair whatever endangers life first.",
-"Everything a crew needs is brought with them. There is no store to order from. Astronauts plan, track and prioritize. When you decide, spend resources on what keeps the crew alive before anything that is only nice to have.",
-"Power runs the air, heat, water and radio. When power drops, crews shut down non-essential systems first. When you decide, keep life support running and switch off the extras until power recovers.",
-"Space dust and small rocks are a real risk, and spacecraft carry shielding. Mars has a thin atmosphere that offers little protection. Crews check for damage, seal any breach, then repair. When you decide, inspect first, seal second, repair third.",
-"Safety gear like alarms and suits is inspected regularly because it matters most when everything else goes wrong. When you decide, fix safety equipment before other repairs and never skip a safety check to save time.",
-"Mars is very cold on average, so habitats need heating and spacesuits need careful planning. Astronauts schedule outdoor work around conditions. When you decide, wait out dangerous weather if you can and avoid unnecessary risks.",
-"On Mars, crews cannot count on instant help from Earth, so they train to make decisions themselves using checklists and teamwork. When you decide, rely on your training, pick the safest option, and report it to Earth afterward.",
-"A signal between Earth and Mars takes minutes each way, so there is no quick back-and-forth. Crews send complete, clear messages and keep working while they wait. When you decide, be clear and thorough, and do not stall waiting for an answer.",
-"Astronauts double-check where they are, keep backup methods and do not work alone. When you decide, stop, verify your position, use your backup and stay together.",
-"In space the sunlit side of a spacecraft gets very hot and the shaded side gets very cold. Thermal systems and suit cooling manage it. When you decide, deal with heat and cold together and protect the people before the equipment.",
-"Calm days still matter. Crews use quiet time to inspect equipment, do maintenance, rest and train. Use calm days to recover, repair and prepare for the next problem."];
+"NASA’s OSDR archive collects space biology experiments, because living in space changes bodies and routines in ways teams must understand. Small stresses add up in a closed habitat. When you decide, protect the team before you try to win the argument.",
+"NASA’s OSDR archive holds many studies on how low gravity affects muscle and bone, and exercise is how crews push back. When you decide, protect health routines even on busy days.",
+"NASA’s EPIC camera photographs the whole sunlit Earth from deep space, a view of home that crews share with each other. When you decide, keep the crew connected and let people talk about how they feel.",
+"InSight’s weather reports were counted in sols, Mars days that run about 40 minutes longer than Earth days, so crews on Mars shift their sleep to match. Tired people make mistakes. When you decide, rest before risky jobs.",
+"InSight’s weather station measured Mars air pressure, a tiny fraction of Earth’s, so a leaking habitat loses air toward the thin outside. Crews find the source, isolate the section and watch the pressure. When you decide, protect the air first.",
+"NASA’s InSight data shows how thin the Martian air is, which is why every habitat depends on its own oxygen. Crews rehearse emergencies until the steps are automatic. When you decide, get people to safety first and equipment second.",
+"NASA’s OSDR archive includes experiments on how plants and microbes behave in spaceflight, and mold spreads quickly in closed habitats. When you decide, act early and never rely on a single food source.",
+"OSDR holds space plant-growth experiments aimed at feeding future crews, but missions still plan food with a safety margin. When you decide, ration early and evenly instead of waiting until supplies are gone.",
+"InSight’s weather station recorded Martian air temperatures far below freezing, so heaters and water lines need protection. When you decide, protect your water first, thaw carefully, then conserve.",
+"InSight measured Martian wind, which lifts fine dust that settles on gear and clogs filters. When you decide, small cleaning habits prevent bigger health and equipment problems.",
+"NASA’s DONKI database lists every instrument that detected each space-weather event, because a reading is trusted when several instruments agree. When you decide, check more than one source before you fix.",
+"InSight’s mission ended in December 2022 when the lander ran out of power, and before that it cut back measurements to stretch what it had. When you decide, keep life support running and switch off the extras.",
+"NASA’s NeoWs service tracks near-Earth asteroids and flags the ones that are potentially hazardous, which gives time to prepare. When you decide, inspect first, seal second and repair third.",
+"NeoWs flags potentially hazardous objects so people can prepare, but a warning only helps if the alarms work. When you decide, fix safety equipment first and never skip a safety check.",
+"InSight recorded air temperatures changing by tens of degrees Celsius within a single Martian day, so crews plan outdoor work around the weather. When you decide, wait out dangerous cold and avoid unnecessary risks.",
+"NASA’s DONKI database logs solar flares and geomagnetic storms, which can disrupt radio links, so a crew may have to act alone. When you decide, rely on your training and checklist, then report afterward.",
+"DONKI shows how one solar flare can be followed by a coronal mass ejection, a shock and a storm days later, while messages between Mars and Earth already take minutes. When you decide, send clear, complete messages and keep working.",
+"NASA’s DONKI database tracks solar flares, and spacecraft face strong sunlight on one side and deep shade on the other, so thermal systems manage the swings. When you decide, protect people first and handle heat and cold together.",
+"NASA’s Astronomy Picture of the Day is a daily reminder that calm days are for looking up and preparing. Crews use quiet time to inspect, maintain, rest and train. Use calm days to recover and prepare for the next problem.",
+"Space-weather records in NASA’s DONKI database help planners pick calmer times for risky operations like landings. A resupply is a gift, not a plan. When you decide, restock what keeps the crew alive first.",
+"InSight ran on solar panels, and its power limits shaped how often it could measure Mars weather. A good power day is a chance to catch up. When you decide, rebuild reserves before you spend them.",
+"NASA’s OSDR archive includes plant-growth experiments, because fresh food supports health and morale on long missions. When you decide, share some of a good harvest now and save some for later.",
+"NASA’s Astronomy Picture of the Day and EPIC views of Earth remind crews of home. Good news lifts morale, but the boost fades. When you decide, use good days to build resilience.",
+"InSight kept sending Mars weather for years because its team managed power and equipment carefully. Good upkeep pays off. When you decide, use a win to build a safety margin.",
+"InSight’s weather data included wind speed and direction, which crews use to pick calm windows for outdoor work. When you decide, use a clear day for jobs that are risky in bad weather.",
+"NASA’s Mars Trek mapping service lets scientists study Mars terrain, and finding water ice is a top priority for future crews. When you decide, think about what you will need most later, not only today.",
+"NASA’s DONKI database tracks the space weather that can disturb radio links, so a clear link is worth using well. When you decide, spend a good connection on what you can only get from Earth.",
+"NASA publishes open APIs so anyone can build tools from real mission data, and shared tools make crews and engineers better at their jobs. When you decide, put an upgrade where the crew is weakest.",
+"DONKI logs solar flares, and when the Sun is quiet crews can plan outdoor work with less worry about radiation. When you decide, use quiet-Sun days for work that is dangerous in a storm.",
+"NASA’s Astronomy Picture of the Day and EPIC views of Earth help crews feel connected to the world, and small traditions keep a team united. When you decide, invest in morale before it gets low.",
+"NASA’s NeoWs service tracks near-Earth asteroids and publishes their sizes and miss distances, so a safe flyby is a chance to learn. When you decide, use quiet moments to prepare for the next problem."];
 const DESC=[
-'Weeks into the mission, small habits are starting to grate. Tools get left out, someone is always loud, and tempers are short in the cramped habitat.',
-'Low gravity is making everyone feel weaker. The exercise gear is ready, but the repair list is long and there is little spare time.',
-'The crew is lonely. Everyone misses family, friends and open skies, and the days all feel the same inside the habitat walls.',
-'The habitat is noisy, the lights stay on, and a Martian day runs a little longer than an Earth day. Crew members are lying awake and getting tired.',
-'An alarm sounds. Air pressure in one module is slowly dropping, and a faint hiss is coming from somewhere near the wall.',
-'The oxygen alarm blares as levels fall fast. The crew has only minutes to act before breathing gets difficult.',
-'White fuzzy mold is spreading across the vegetable crop. If it keeps going, the garden that feeds the crew could be lost.',
-'A count of the pantry shows less food than planned. The next supply ship is months away, so the crew must decide how to stretch what is left.',
-'Meals have become the same few packaged dishes. Morale is dropping and some crew members are skipping meals.',
-'A freezing night has frozen part of the water line, and water has stopped flowing into the habitat tanks.',
-'Red dust is on everything and there is no shower. Dirty filters and surfaces have the crew worried about germs.',
-'Water use has crept above plan. The recycler is working hard and the tanks are lower than expected.',
-'A key system crashes and the control panel fills with error codes. Nobody is sure what is wrong, and the crew has to decide how to fix it.',
-'Supplies are running lower than planned across the board, and the crew cannot cover every need. They must decide what comes first.',
-'The solar panels are producing less power than expected, and the batteries are draining faster than planned.',
-'A loud bang echoes through the habitat. A small meteorite has hit the outer wall, and the crew does not know how far the damage goes.',
-'During a routine check the crew finds a dead alarm and a cracked helmet visor. The gear meant to keep them safe cannot be trusted.',
-'A bitter cold snap hits the surface. The habitat heaters struggle, and going outside is dangerous.',
-'An emergency strikes and the crew calls Mission Control. There is no reply, and every minute counts.',
-'A message to Earth takes many minutes each way. The crew needs advice now, but there can be no real conversation.',
-'Dust and glitches make the maps unreliable. A team out on the surface is not sure of the way back to the habitat.',
-'In flight, the sunlit side of the ship is overheating while the shaded side freezes, and some systems start acting strangely.',
-'A quiet day. Every system reads normal and nothing needs urgent attention. It is a chance to catch your breath.'];
-const descHTML=n=>'<p class="desc">'+DESC[Math.min(n,DESC.length)-1]+'</p>';
-function lessonHTML(n){return '<div class="lesson"><h3>Astronaut life lesson</h3><p>'+LESSON[Math.min(n,LESSON.length)-1]+'</p></div>'}
+"Weeks into the mission, small habits are starting to grate. Tools get left out, someone is always loud, and tempers are short in the cramped habitat.",
+"Low gravity is making everyone feel weaker. The exercise gear is ready, but the repair list is long and there is little spare time.",
+"The crew is lonely. Everyone misses family, friends and open skies, and the days all feel the same inside the habitat walls.",
+"The habitat is noisy, the lights stay on, and a Martian day runs a little longer than an Earth day. Crew members are lying awake and getting tired.",
+"An alarm sounds. Air pressure in one module is slowly dropping, and a faint hiss is coming from somewhere near the wall.",
+"The oxygen alarm blares as levels fall fast. The crew has only minutes to act before breathing gets difficult.",
+"White fuzzy mold is spreading across the vegetable crop. If it keeps going, the garden that feeds the crew could be lost.",
+"A count of the pantry shows less food than planned. The next supply ship is months away, so the crew must decide how to stretch what is left.",
+"A freezing night has frozen part of the water line, and water has stopped flowing into the habitat tanks.",
+"Red dust is on everything and there is no shower. Dirty filters and surfaces have the crew worried about germs.",
+"A key system crashes and the control panel fills with error codes. Nobody is sure what is wrong, and the crew has to decide how to fix it.",
+"The solar panels are producing less power than expected, and the batteries are draining faster than planned.",
+"A loud bang echoes through the habitat. A small meteorite has hit the outer wall, and the crew does not know how far the damage goes.",
+"During a routine check the crew finds a dead alarm and a cracked helmet visor. The gear meant to keep them safe cannot be trusted.",
+"A bitter cold snap hits the surface. The habitat heaters struggle, and going outside is dangerous.",
+"An emergency strikes and the crew calls Mission Control. There is no reply, and every minute counts.",
+"A message to Earth takes many minutes each way. The crew needs advice now, but there can be no real conversation.",
+"In flight, the sunlit side of the ship is overheating while the shaded side freezes, and some systems start acting strangely.",
+"A quiet day. Every system reads normal and nothing needs urgent attention. It is a chance to catch your breath.",
+"A cargo lander from Earth touches down near the habitat. The crew has time to unpack one crate first.",
+"The dust clears and the solar panels are producing more power than planned. The crew can decide how to use the surplus.",
+"The greenhouse produces a bigger harvest than anyone expected. The crew can decide how to use it.",
+"Mission Control sends a message full of good news and notes from family and friends. Morale soars.",
+"The crew finishes a tricky repair ahead of schedule, and the habitat hums along better than before.",
+"A rare calm day on the surface: the wind is low and the sky is clear, perfect for outdoor work.",
+"A rover scan finds a patch of buried ice close to the habitat.",
+"The Earth link is clear and strong, so the crew can talk live with Mission Control.",
+"A software update from Earth makes the recycling and power systems more efficient.",
+"Forecasters report a very quiet Sun, so the crew can plan outdoor work with little radiation worry.",
+"It is a crew member’s birthday, and everyone wants to celebrate.",
+"A large asteroid passes at a safe distance, giving the crew a rare chance to watch it go by."];
+function lessonHTML(n){return '<div class="lesson"><h3>NASA life lesson</h3><p>'+LESSON[ix(n)]+'</p></div>'}
 const CHOICES=[
-[['Hold a crew meeting and rebalance chores',{crew:10,safety:-5}],['Ignore it and keep working',{safety:5,crew:-10}]],
-[['Do the full exercise routine',{crew:10,food:-5}],['Skip exercise to finish repairs',{safety:5,crew:-10}]],
-[['Use power for a video call to Earth',{crew:10,power:-10}],['Save power and stay quiet',{power:5,crew:-10}]],
-[['Enforce a full rest shift',{crew:10,safety:-5}],['Work through the night',{safety:10,crew:-10}]],
-[['Patch the leak now with emergency sealant',{oxygen:10,power:-10}],['Seal off the module and abandon it',{safety:5,oxygen:-10}]],
-[['Switch to emergency oxygen tanks',{oxygen:15,safety:-10}],['Start the backup air scrubber',{oxygen:10,power:-10}]],
-[['Cut out and burn the infected plants',{safety:5,food:-10}],['Treat the plants and keep growing',{food:5,water:-10}]],
-[['Strict rations for everyone',{food:10,crew:-10}],['Open the emergency food reserve',{food:15,safety:-10}]],
-[['Share a special meal',{crew:10,food:-10}],['Stick to plain rations',{food:5,crew:-5}]],
-[['Heat the pipe back up',{water:10,power:-10}],['Shut the pipe off and use stored water',{safety:5,water:-10}]],
-[['Do a full cleaning day',{safety:10,water:-10}],['Wipe down quickly and move on',{water:5,safety:-10}]],
-[['Recycle harder and shorten washing',{water:10,crew:-10}],['Use water as normal',{crew:5,water:-10}]],
-[['Run full diagnostics before fixing',{safety:10,power:-10}],['Try a quick patch',{power:5,safety:-10}]],
-[['Put water first',{water:10,food:-10}],['Put food first',{food:10,oxygen:-10}]],
-[['Switch off non-essential systems',{power:10,crew:-5}],['Keep everything running',{crew:5,power:-10}]],
-[['Inspect the whole hull, then seal',{safety:10,power:-5}],['Seal the loudest leak and move on',{oxygen:10,safety:-10}]],
-[['Repair alarms and suits first',{safety:15,power:-10}],['Finish chores and fix safety gear later',{power:5,safety:-10}]],
-[['Stay inside and heat the habitat',{safety:10,power:-5}],['Go out to harvest ice for water',{water:10,safety:-10}]],
-[['Follow the emergency checklist yourselves',{safety:10,crew:-5}],['Wait for Earth to reply',{crew:5,safety:-10}]],
-[['Send one detailed message and keep working',{safety:10,power:-5}],['Wait by the radio',{power:5,safety:-10}]],
-[['Stop and use backup beacons',{safety:10,power:-10}],['Keep going by sight to save time',{crew:5,safety:-10}]],
-[['Run the heating and cooling systems',{safety:10,power:-10}],['Add extra layers and save power',{power:5,crew:-10}]],
-[['Rest and recover',{crew:10,safety:-5}],['Do maintenance and safety checks',{safety:10,crew:-5}]]];
-const THIRD=[
-['Set up separate quiet hours',{crew:5,power:-5}],
-['Do a short workout and keep repairing',{crew:5,safety:-5}],
-['Hold a crew movie night',{crew:5,power:-5}],
-['Sleep in two shifts so someone is always on watch',{safety:5,crew:-5}],
-['Plug it with spare supplies and watch the pressure',{oxygen:5,safety:-5}],
-['Move everyone into the smallest sealed room',{oxygen:5,crew:-5}],
-['Isolate the plants and test a sample',{safety:5,water:-5}],
-['Ask Earth for a faster supply plan',{food:5,power:-5}],
-['Swap meals so everyone gets some variety',{crew:5,food:-5}],
-['Wrap the pipe and thaw it slowly',{water:5,power:-5}],
-['Clean the air filters only',{safety:5,crew:-5}],
-['Fix small leaks and track every drop',{water:5,safety:-5}],
-['Ask Earth for help with the repair',{safety:5,crew:-5}],
-['Put power first',{power:10,water:-10}],
-['Switch to the backup generator',{power:5,safety:-5}],
-['Cover the damage with a temporary patch',{oxygen:5,power:-5}],
-['Test only the suits',{safety:5,crew:-5}],
-['Send one rover out to check conditions',{water:5,power:-5}],
-['Split the crew: half follow the checklist, half try Earth',{safety:5,crew:-5}],
-['Send a short update and check back later',{crew:5,safety:-5}],
-['Mark a safe route and turn back',{safety:5,oxygen:-5}],
-['Rotate the ship to shade the hot side',{power:5,safety:-5}],
-['Take a short rest and fix one small thing',{crew:5,power:-5}]];
-THIRD.forEach((t,i)=>CHOICES[i].push(t));
+[["Hold a crew meeting and rebalance chores",{"crew":10,"safety":-5}],["Ignore it and keep working",{"safety":5,"crew":-10}],["Set up separate quiet hours",{"crew":5,"power":-5}]],
+[["Do the full exercise routine",{"crew":10,"food":-5}],["Skip exercise to finish repairs",{"safety":5,"crew":-10}],["Do a short workout and keep repairing",{"crew":5,"safety":-5}]],
+[["Use power for a video call to Earth",{"crew":10,"power":-10}],["Save power and stay quiet",{"power":5,"crew":-10}],["Hold a crew movie night",{"crew":5,"power":-5}]],
+[["Enforce a full rest shift",{"crew":10,"safety":-5}],["Work through the night",{"safety":10,"crew":-10}],["Sleep in two shifts so someone is always on watch",{"safety":5,"crew":-5}]],
+[["Patch the leak now with emergency sealant",{"oxygen":10,"power":-10}],["Seal off the module and abandon it",{"safety":5,"oxygen":-10}],["Plug it with spare supplies and watch the pressure",{"oxygen":5,"safety":-5}]],
+[["Switch to emergency oxygen tanks",{"oxygen":15,"safety":-10}],["Start the backup air scrubber",{"oxygen":10,"power":-10}],["Move everyone into the smallest sealed room",{"oxygen":5,"crew":-5}]],
+[["Cut out and burn the infected plants",{"safety":5,"food":-10}],["Treat the plants and keep growing",{"food":5,"water":-10}],["Isolate the plants and test a sample",{"safety":5,"water":-5}]],
+[["Strict rations for everyone",{"food":10,"crew":-10}],["Open the emergency food reserve",{"food":15,"safety":-10}],["Ask Earth for a faster supply plan",{"food":5,"power":-5}]],
+[["Heat the pipe back up",{"water":10,"power":-10}],["Shut the pipe off and use stored water",{"safety":5,"water":-10}],["Wrap the pipe and thaw it slowly",{"water":5,"power":-5}]],
+[["Do a full cleaning day",{"safety":10,"water":-10}],["Wipe down quickly and move on",{"water":5,"safety":-10}],["Clean the air filters only",{"safety":5,"crew":-5}]],
+[["Run full diagnostics before fixing",{"safety":10,"power":-10}],["Try a quick patch",{"power":5,"safety":-10}],["Ask Earth for help with the repair",{"safety":5,"crew":-5}]],
+[["Switch off non-essential systems",{"power":10,"crew":-5}],["Keep everything running",{"crew":5,"power":-10}],["Switch to the backup generator",{"power":5,"safety":-5}]],
+[["Inspect the whole hull, then seal",{"safety":10,"power":-5}],["Seal the loudest leak and move on",{"oxygen":10,"safety":-10}],["Cover the damage with a temporary patch",{"oxygen":5,"power":-5}]],
+[["Repair alarms and suits first",{"safety":15,"power":-10}],["Finish chores and fix safety gear later",{"power":5,"safety":-10}],["Test only the suits",{"safety":5,"crew":-5}]],
+[["Stay inside and heat the habitat",{"safety":10,"power":-5}],["Go out to harvest ice for water",{"water":10,"safety":-10}],["Send one rover out to check conditions",{"water":5,"power":-5}]],
+[["Follow the emergency checklist yourselves",{"safety":10,"crew":-5}],["Wait for Earth to reply",{"crew":5,"safety":-10}],["Split the crew: half follow the checklist, half try Earth",{"safety":5,"crew":-5}]],
+[["Send one detailed message and keep working",{"safety":10,"power":-5}],["Wait by the radio",{"power":5,"safety":-10}],["Send a short update and check back later",{"crew":5,"safety":-5}]],
+[["Run the heating and cooling systems",{"safety":10,"power":-10}],["Add extra layers and save power",{"power":5,"crew":-10}],["Rotate the ship to shade the hot side",{"power":5,"safety":-5}]],
+[["Rest and recover",{"crew":10,"safety":-5}],["Do maintenance and safety checks",{"safety":10,"crew":-5}],["Take a short rest and fix one small thing",{"crew":5,"power":-5}]],
+[["Unpack the food crate",{"food":20,"safety":-5}],["Unpack the water crate",{"water":20,"safety":-5}],["Unpack the repair crate",{"safety":15,"food":-5}]],
+[["Charge the batteries",{"power":20,"crew":-5}],["Run the greenhouse lights and heaters",{"food":15,"power":-5}],["Power the air recyclers",{"oxygen":15,"power":-5}]],
+[["Store the harvest",{"food":20,"crew":-5}],["Hold a harvest feast",{"crew":20,"food":-5}],["Grow more with cuttings and compost",{"oxygen":10,"water":-5}]],
+[["Hold a crew celebration",{"crew":20,"food":-5}],["Use the energy to catch up on repairs",{"safety":15,"crew":-5}],["Rest and recover",{"crew":15,"power":-5}]],
+[["Test every system again",{"safety":15,"power":-5}],["Use the spare time to rest",{"crew":15,"safety":-5}],["Fix a second problem while the tools are out",{"power":15,"crew":-5}]],
+[["Collect ice for water",{"water":15,"safety":-5}],["Inspect the outside of the habitat",{"safety":15,"crew":-5}],["Take a walk to boost morale",{"crew":15,"power":-5}]],
+[["Melt the ice for drinking water",{"water":20,"power":-5}],["Split the ice into oxygen",{"oxygen":20,"power":-5}],["Keep it as an emergency reserve",{"water":10,"oxygen":10,"safety":-5}]],
+[["Ask experts for repair advice",{"safety":15,"crew":-5}],["Hold a video call with families",{"crew":20,"power":-5}],["Get an updated supply plan",{"food":15,"power":-5}]],
+[["Upgrade the air system",{"oxygen":15,"safety":-5}],["Upgrade the power system",{"power":15,"crew":-5}],["Upgrade the water system",{"water":15,"power":-5}]],
+[["Do long outdoor repairs",{"safety":15,"crew":-5}],["Go out to collect ice",{"water":15,"power":-5}],["Tune up the radios",{"crew":15,"food":-5}]],
+[["Throw a party",{"crew":20,"food":-5}],["Have a quiet story night",{"crew":15,"power":-5}],["Celebrate while working",{"safety":10,"food":-5}]],
+[["Watch and record it",{"crew":15,"power":-5}],["Use the quiet to run safety checks",{"safety":15,"crew":-5}],["Share the data with Earth",{"power":10,"safety":-5}]]];
 const TC=["#d6452d","#2f6fd6"],NAMES=["Team A","Team B"],FACES="⚀⚁⚂⚃⚄⚅";
 const MODES=[["phys","Physical board game","Use your own board and cards. The die and resources are digital."],["online","All-online","Board, cards and pieces all on screen, for one or two teams."],["solo","Solo","A game for one player with the full online board."]];
-const ICO=[["👥","#8e5bd6"],["🏋️","#8e5bd6"],["🌍","#8e5bd6"],["😴","#8e5bd6"],["💨","#2f6fd6"],["🆘","#c9382a"],["🍄","#1f9a68"],["🥫","#1f9a68"],["🍽️","#1f9a68"],["🧊","#1b8fa0"],["🧼","#1b8fa0"],["💧","#1b8fa0"],["🔧","#b8720c"],["📦","#b8720c"],["🔋","#b8720c"],["☄️","#c9382a"],["🚨","#c9382a"],["🥶","#4f86c6"],["📡","#148f8f"],["⏳","#148f8f"],["🧭","#148f8f"],["🔥","#d9622b"],["✅","#1f9a68"]];
+const ICO=[
+["👥","#8e5bd6"],
+["🏋️","#8e5bd6"],
+["🌍","#8e5bd6"],
+["😴","#8e5bd6"],
+["💨","#2f6fd6"],
+["🆘","#c9382a"],
+["🍄","#1f9a68"],
+["🥫","#1f9a68"],
+["🧊","#1b8fa0"],
+["🧼","#1b8fa0"],
+["🔧","#b8720c"],
+["🔋","#b8720c"],
+["☄️","#c9382a"],
+["🚨","#c9382a"],
+["🥶","#4f86c6"],
+["📡","#148f8f"],
+["⏳","#148f8f"],
+["🔥","#d9622b"],
+["✅","#1f9a68"],
+["🚀","#1f9a68"],
+["☀️","#b8720c"],
+["🥬","#1f9a68"],
+["💌","#8e5bd6"],
+["🛠️","#b8720c"],
+["🌤️","#4f86c6"],
+["🧊","#1b8fa0"],
+["🛰️","#148f8f"],
+["💻","#8e5bd6"],
+["🌞","#b8720c"],
+["🎂","#8e5bd6"],
+["🔭","#148f8f"]];
 const RES=[["oxygen","Oxygen","OXYGEN CRITICAL!"],["water","Water","WATER CRITICAL!"],["food","Food","FOOD CRITICAL!"],["power","Power","POWER CRITICAL!"],["safety","Safety","SAFETY CRITICAL!"],["crew","Crew health","CREW HEALTH CRITICAL!"]];
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const fresh=()=>({pick:null,setup:{nt:1,sizes:[1,1]},mode:null,started:false,over:false,winner:null,teams:[],turn:0,deck:[],num:0,picked:true,outcome:"",title:"",msg:"",last:0});
@@ -210,13 +274,13 @@ const save=()=>{try{localStorage.setItem("marsMadness",JSON.stringify(S))}catch(
 const T=()=>S.teams[S.turn];
 const locked=()=>S.teams.some(t=>t.day>=1);
 const cellOf=p=>p===0?0:((p-1)%30)+1;
-const ico=n=>ICO[Math.min(n,ICO.length)-1];
+const ico=n=>ICO[ix(n)];
 const fx=e=>RES.filter(([k])=>e[k]).map(([k,n])=>(e[k]>0?'+':'−')+Math.abs(e[k])+' '+n).join(' · ');
-function cardHTML(n){const [e,c]=ico(n);return '<div class="card" style="--c:'+c+'"><div class="ctop"><span class="cn">Card '+n+'</span><span class="ci" aria-hidden="true">'+e+'</span></div><div class="cb"><h3>'+CARDS[n-1]+'</h3><p>'+DESC[Math.min(n,DESC.length)-1]+'</p></div></div>'}
+function cardHTML(n){const [e,c]=ico(n);return '<div class="card" style="--c:'+c+'"><div class="ctop"><span class="cn">Card '+n+(n>=23?' · Good news':isQ(n)?' · Quiet day':'')+'</span><span class="ci" aria-hidden="true">'+e+'</span></div><div class="cb"><h3>'+CARDS[n-1]+'</h3><p>'+DESC[ix(n)]+'</p></div></div>'}
 function miniHTML(n){const [e,c]=ico(n);return '<div class="mini" style="--c:'+c+'" title="Card '+n+': '+CARDS[n-1]+'"><b>'+n+'</b><span>'+e+'</span></div>'}
 function choiceHTML(){
   if(S.picked)return S.outcome?'<div class="outcome">'+S.outcome+'</div>':'';
-  const set=CHOICES[Math.min(S.num,CHOICES.length)-1];
+  const set=CHOICES[ix(S.num)];
   return '<div class="lesson"><h3>What does the crew do?</h3>'+set.map((o,k)=>'<button class="choice" data-c="'+k+'">'+o[0]+'<small>'+fx(o[1])+'</small></button>').join('')+'</div>';
 }
 function tokens(s){let h="";S.teams.forEach((t,i)=>t.pos.forEach((p,m)=>{if(cellOf(p)===s)h+='<span class="tok'+(i===S.turn&&m===t.mi?' on':'')+'" style="background:'+TC[i]+'" title="'+t.name+'">'+"AB"[i]+'</span>'}));return h}
@@ -234,10 +298,38 @@ function teamHTML(t,i){
     [-10,-5,5,10].map(d=>'<button data-t="'+i+'" data-k="'+k+'" data-d="'+d+'" aria-label="'+t.name+' '+n+(d>0?' plus ':' minus ')+Math.abs(d)+'"'+(off?' disabled':'')+'>'+(d>0?'+':'−')+Math.abs(d)+'</button>').join('')+'</div>'+(low?'<div class="warn">'+w+'</div>':'')+'</div>'});
   return h+'</section>';
 }
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let NASA={};
+const NMAP={"POWER PROBLEMS":"sun","EARTH DOESN’T ANSWER IN AN EMERGENCY":"sun","COMMUNICATION DELAYS":"sun","EXTREME TEMPERATURES IN SPACE":"sun","SUPPLY DROP FROM EARTH":"sun","EARTH LINK OPENS":"sun","QUIET SUN":"sun","METEORITE DAMAGE":"neo","SAFE ASTEROID FLYBY":"neo","EXTREME TEMPERATURES ON MARS":"insight","SOLAR PANELS WORKING WELL":"insight","CLEAR SKIES":"insight","ALL SYSTEMS NORMAL":"apod","GOOD NEWS FROM HOME":"apod","CREW BIRTHDAY":"apod"};
+const frank=c=>{const m=/^([A-Z])(\d+(?:\.\d+)?)/.exec(c||"");return m?"ABCMX".indexOf(m[1])*100+parseFloat(m[2]):-1};
+function nasaBox(n){
+  const d=NASA[NMAP[CARDS[n-1]]];if(!d)return"";
+  return '<div class="nasa"><h3>Real NASA data · '+d.head+'</h3><p>'+esc(d.text)+'</p>'+(/^https:/.test(d.img||"")?'<img src="'+esc(d.img)+'" alt="'+esc(d.alt)+'" onerror="this.remove()">':'')+'<small>'+d.src+'</small></div>';
+}
+async function nj(u){const r=await fetch(u);if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}
+async function loadNasa(){
+  const B="https://api.nasa.gov/",q="&api_key=DEMO_KEY";
+  const iso=d=>new Date(Date.now()-d*864e5).toISOString().slice(0,10),dr="startDate="+iso(30)+"&endDate="+iso(0);
+  const R=await Promise.allSettled([nj(B+"insight_weather/?feedtype=json&ver=1.0"+q),nj(B+"neo/rest/v1/feed?start_date="+iso(6)+"&end_date="+iso(0)+q),nj(B+"DONKI/FLR?"+dr+q),nj(B+"DONKI/GST?"+dr+q),nj(B+"planetary/apod?thumbs=true"+q)]);
+  const [ins,neo,flr,gst,apod]=R,v=x=>x.status==="fulfilled"?x.value:null,N={};
+  try{const j=v(ins),sk=j&&j.sol_keys||[],sol=sk[sk.length-1],s=j&&j[sol];
+    if(s&&s.AT)N.insight={head:"InSight Mars weather",text:"On sol "+sol+(s.Season?" ("+s.Season+")":"")+", InSight measured air temperatures from "+Math.round(s.AT.mn)+" °C to "+Math.round(s.AT.mx)+" °C"+(s.PRE?", with air pressure near "+Math.round(s.PRE.av)+" Pa":"")+". Crews plan every outdoor job around swings like this. (InSight stopped working in 2022, so these are its last recorded sols.)",src:"api.nasa.gov · InSight: Mars Weather"}}catch(e){}
+  try{const j=v(neo),all=[].concat(...Object.values(j&&j.near_earth_objects||{}));
+    if(all.length){const dm=o=>o.estimated_diameter.meters.estimated_diameter_max,km=o=>+o.close_approach_data[0].miss_distance.kilometers;
+      const big=all.reduce((a,b)=>dm(b)>dm(a)?b:a),near=all.reduce((a,b)=>km(b)<km(a)?b:a),haz=all.filter(o=>o.is_potentially_hazardous_asteroid).length;
+      N.neo={head:"near-Earth asteroids",text:"NASA tracked "+all.length+" near-Earth asteroids in the past week, and "+haz+(haz===1?" was":" were")+" flagged potentially hazardous. The largest, "+big.name+", is up to about "+Math.round(dm(big))+" m wide, and the closest ("+near.name+") passed about "+Math.round(km(near)).toLocaleString()+" km from Earth. Spotting hazards early gives crews time to prepare.",src:"api.nasa.gov · NeoWs"}}}catch(e){}
+  try{const fl=Array.isArray(v(flr))?v(flr):[],gs=Array.isArray(v(gst))?v(gst):[];
+    if(fl.length||gs.length){const top=fl.reduce((a,b)=>frank(b.classType)>frank(a.classType)?b:a,{classType:""}),kp=Math.max(0,...gs.flatMap(g=>(g.allKpIndex||[]).map(k=>+(k.kpIndex!==undefined?k.kpIndex:k.KpIndex)||0)));
+      N.sun={head:"space weather",text:"In the past 30 days NASA logged "+fl.length+" solar flares"+(top.classType?" (strongest: class "+top.classType+")":"")+" and "+gs.length+" geomagnetic storm"+(gs.length===1?"":"s")+(kp?" (peak Kp "+kp+")":"")+". Space weather can disturb power systems and radio links, so crews watch it closely.",src:"api.nasa.gov · DONKI"}}}catch(e){}
+  try{const a=v(apod);
+    if(a&&a.title)N.apod={head:"Astronomy Picture of the Day",text:a.title+". "+String(a.explanation||"").split(". ").slice(0,2).join(". "),img:a.media_type==="image"?a.url:a.thumbnail_url,alt:a.title,src:"api.nasa.gov · APOD ("+a.date+")"}}catch(e){}
+  NASA=N;
+  render();
+}
 function endHTML(){
   const w=S.winner,multi=S.teams.length>1,sc=t=>RES.reduce((a,[k])=>a+t.r[k],0);
-  const head=w!==null?(multi?S.teams[w].name+" survived 30 days first!":"Mission complete! You survived 30 days."):(multi?"No team survived.":"Mission failed.");
-  return '<h2>'+head+'</h2><ul>'+S.teams.map((t,i)=>'<li style="--tc:'+TC[i]+'"><b>'+t.name+'</b> · '+(t.out?'out on day '+t.day+' ('+t.why+')':'day '+t.day+' of 30')+' · score '+sc(t)+'</li>').join('')+'</ul><button class="primary" id="endNew">New mission</button>';
+  const head=w!==null?(multi?(S.tie?"It’s a tie! Both teams survived 30 days with the same score.":S.teams.filter(x=>x.done).length>1?S.teams[w].name+" wins on score! Both teams survived 30 days.":S.teams[w].name+" survived 30 days first!"):"Mission complete! You survived 30 days."):(multi?"No team survived.":"Mission failed.");
+  return '<h2>'+head+'</h2><ul>'+S.teams.map((t,i)=>'<li style="--tc:'+TC[i]+'"><b>'+t.name+'</b> · '+(t.out?'out on day '+t.day+' ('+t.why+')':'day '+t.day+' of 30')+' · score '+sc(t)+' ('+Math.round(100*sc(t)/(6*t.max))+'% of max)</li>').join('')+'</ul><button class="primary" id="endNew">New mission</button>';
 }
 function render(){
   if(!S.started)return;
@@ -249,20 +341,20 @@ function render(){
   $("pos").textContent=(S.teams.length>1?t.name+"’s turn · ":"")+(ph?"":"Space "+cellOf(me)+(me>30?" · lap "+(Math.floor((me-1)/30)+1):"")+" · ")+(S.last?"last roll "+S.last:"no rolls yet");
   $("dief").textContent=FACES[S.last?S.last-1:0];
   $("stitle").textContent=S.title;$("smsg").textContent=S.msg;
-  $("card").innerHTML=S.num?cardHTML(S.num)+lessonHTML(S.num)+choiceHTML():"";
+  $("card").innerHTML=S.num?cardHTML(S.num)+lessonHTML(S.num)+nasaBox(S.num)+choiceHTML():"";
   if(!ph)$("board").innerHTML=boardHTML();
-  $("psum").textContent="Cards & discards"+(S.teams.length>1?" · "+t.name:"")+" · "+(ph?"":(30-t.dp)+" in deck · ")+t.used.length+" discarded";
-  $("pbody").innerHTML=(ph?"":'<div class="pile"><div class="back">MARS</div>'+(30-t.dp)+' left</div>')+'<div class="disc">'+(t.used.length?t.used.map(miniHTML).join(""):'No discards yet')+'</div>';
+  $("psum").textContent="Cards & discards"+(S.teams.length>1?" · "+t.name:"")+" · "+(ph?"":(S.deck.length-t.dp)+" in deck · ")+t.used.length+" discarded";
+  $("pbody").innerHTML=(ph?"":'<div class="pile"><div class="back">MARS</div>'+(S.deck.length-t.dp)+' left</div>')+'<div class="disc">'+(t.used.length?t.used.map(miniHTML).join(""):'No discards yet')+'</div>';
   $("ovrnote").textContent=locked()?"Locked. Resources now change only through scenario choices.":"Set starting resources before day 1. This locks once the first scenario is resolved.";
   $("teams").innerHTML=S.teams.map(teamHTML).join("");
   $("end").style.display=S.over?"flex":"none";if(S.over)$("endbox").innerHTML=endHTML();
   save();
 }
 function nextTurn(){
-  let k=S.turn;do{k=(k+1)%S.teams.length}while(S.teams[k].out);
+  let k=S.turn,c=0;do{k=(k+1)%S.teams.length;c++}while((S.teams[k].out||S.teams[k].done)&&c<S.teams.length);
   S.turn=k;
 }
-const DRAIN=5,QUIET=23;
+const DRAIN=3,isQ=n=>n>=19&&n<=22;
 function settle(o){
   const t=T();
   if(o)RES.forEach(([key])=>{const d=o[1][key];if(d)t.r[key]=Math.max(0,Math.min(t.max,t.r[key]+d))});
@@ -271,16 +363,19 @@ function settle(o){
   S.outcome=(o?(S.teams.length>1?t.name+' chose ':'You chose ')+'“'+o[0]+'”: '+fx(o[1])+' · ':'A quiet day: no decisions to make. ')+'Daily use: −'+DRAIN+' of every resource.';
   const z=RES.find(([key])=>t.r[key]===0);
   if(z){t.out=true;t.why=z[1]+" ran out"}
-  if(!t.out&&t.day>=30){S.winner=S.turn;S.over=true}
-  else if(S.teams.every(x=>x.out))S.over=true;
+  if(!t.out&&t.day>=30)t.done=true;
+  const sc=x=>RES.reduce((a,[k])=>a+x.r[k],0)/(6*x.max),fin=S.teams.map((x,i)=>i).filter(i=>S.teams[i].done);
+  if(S.teams.every(x=>x.out))S.over=true;
+  else if(fin.length&&!S.teams.some((x,i)=>i>S.turn&&!x.out&&!x.done))S.over=true;
+  if(S.over&&fin.length){const top=Math.max(...fin.map(i=>sc(S.teams[i])));const ws=fin.filter(i=>sc(S.teams[i])===top);S.winner=ws[0];S.tie=ws.length>1}
   if(!S.over)nextTurn();
-  S.msg=(t.out?t.name+" is out: "+t.why+". ":"Day complete. ")+(S.over?"":(S.teams.length>1?T().name+" is up: roll the die.":"Roll the die for your next turn."));
+  S.msg=(t.out?t.name+" is out: "+t.why+". ":t.done?t.name+" survived 30 days! ":"Day complete. ")+(S.over?"":(S.teams.length>1?T().name+" is up: roll the die.":"Roll the die for your next turn."));
 }
 function choose(k){
-  if(!S.num||S.picked||S.over||S.num>=QUIET)return;
-  settle(CHOICES[Math.min(S.num,CHOICES.length)-1][k]);render();
+  if(!S.num||S.picked||S.over||isQ(S.num))return;
+  settle(CHOICES[ix(S.num)][k]);render();
 }
-function draw(t){const i=S.deck[t.dp];t.dp++;S.num=i+1;S.picked=false;S.outcome="";if(S.num>=QUIET)settle(null)}
+function draw(t){const i=S.deck[t.dp];t.dp++;S.num=i+1;S.picked=false;S.outcome="";if(isQ(S.num))settle(null)}
 let rolling=false;
 $("rollBtn").onclick=()=>{
   if(rolling||S.over||!S.started)return;
@@ -298,9 +393,9 @@ $("rollBtn").onclick=()=>{
 function play(raw){
   if(S.over||S.mode!=="phys")return;
   const t=T(),m=String(raw||"").match(/\d+/),n=m?parseInt(m[0],10):0;
-  if(n<1||n>30){S.num=0;S.title="Unknown card";S.msg="Enter a card number from 1 to 30.";render();return}
+  if(n<1||n>34){S.num=0;S.title="Unknown card";S.msg="Enter a card number from 1 to 34.";render();return}
   if(t.used.includes(n)){S.num=0;S.title="Card already used!";S.msg="Card "+n+" was already played by "+t.name+".";render();return}
-  S.num=n;S.picked=false;S.outcome="";S.title="Card "+n;S.msg="Read the scenario, then choose how your crew responds.";if(n>=QUIET)settle(null);render();
+  S.num=n;S.picked=false;S.outcome="";S.title="Card "+n;S.msg="Read the scenario, then choose how your crew responds.";if(isQ(n))settle(null);render();
 }
 $("goBtn").onclick=()=>{play($("code").value);$("code").value=""};
 $("code").addEventListener("keydown",e=>{if(e.key==="Enter")$("goBtn").click()});
@@ -337,8 +432,8 @@ $("startBtn").onclick=()=>{
   const solo=S.pick==="solo",nt=solo?1:S.setup.nt;
   S.mode=S.pick;
   S.teams=Array.from({length:nt},(_,i)=>{const size=solo?1:S.setup.sizes[i],max=100+20*(size-1),r={};RES.forEach(([k])=>r[k]=max);
-    return {name:solo?"Solo crew":NAMES[i],size,max,r,day:0,used:[],dp:0,pos:[0],mi:0,out:false,why:""}});
-  S.deck=shuffle(Array.from({length:30},(_,i)=>i));
+    return {name:solo?"Solo crew":NAMES[i],size,max,r,day:0,used:[],dp:0,pos:[0],mi:0,out:false,done:false,why:""}});
+  S.deck=shuffle(Array.from({length:34},(_,i)=>i));
   S.turn=0;S.started=true;S.over=false;S.winner=null;S.num=0;S.picked=true;S.last=0;S.outcome="";
   S.title="Mission start";
   S.msg=S.mode==="phys"?"Roll the die, move, then enter the number on the card you draw.":"Roll the die. Your piece moves and a card is drawn automatically.";
@@ -358,7 +453,7 @@ $("resetBtn").onclick=()=>{
   rt=setTimeout(()=>{rt=0;$("resetBtn").textContent="New mission"},4000);
 };
 $("end").addEventListener("click",e=>{if(e.target.id==="endNew")hardReset()});
-renderTitle();
+renderTitle();loadNasa();
 </script>
 </body>
 </html>
