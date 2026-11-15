@@ -36,14 +36,14 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .srow button{min-width:44px}.srow button[aria-pressed=true]{background:var(--btn);color:var(--btnink)}
 .ts .setup p{font-size:14px;max-width:none;margin:0;color:var(--mute)}
 #startBtn,#contBtn{max-width:420px}
-.die{display:flex;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}.die>div:last-child{flex:1}.dief{font-size:76px;line-height:1;min-width:84px;text-align:center}#pos{color:var(--mute);margin-top:6px;font-size:14px}
+.die{display:flex;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}.die>div:last-child{flex:1}.dief{font-size:60px;white-space:nowrap;line-height:1;min-width:84px;text-align:center}#pos{color:var(--mute);margin-top:6px;font-size:14px}
 .start{display:flex;align-items:center;gap:6px;min-height:34px;padding:4px 8px;margin-bottom:6px;background:var(--panel);border:1px dashed var(--line);border-radius:10px;font:700 14px "Chakra Petch",sans-serif}
 .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;max-width:640px}
 .cell{aspect-ratio:1;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px;display:flex;flex-wrap:wrap;align-content:flex-end;gap:2px;position:relative}
 .cell i{position:absolute;top:3px;left:5px;font:600 11px "IBM Plex Sans",sans-serif;font-style:normal;color:var(--mute)}
 .tok{width:20px;height:20px;border-radius:50%;color:#fff;font:700 12px/20px "Chakra Petch",sans-serif;text-align:center;box-shadow:0 0 0 2px var(--panel)}.tok.on{box-shadow:0 0 0 2px var(--ink)}
 #board{margin-bottom:12px}
-.manual{display:flex;gap:8px;margin-bottom:12px}.manual input{flex:1;min-width:0;font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink)}
+.manual{display:flex;gap:8px;margin-bottom:12px}.dice{flex-wrap:wrap;align-items:center}.dice .dl{font-weight:600;width:100%}.dice input{max-width:90px}.dice button[aria-pressed=true]{background:var(--btn);color:var(--btnink)}.manual input{flex:1;min-width:0;font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink)}
 .scan{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:12px;max-width:420px}.scan video{width:100%;border-radius:8px;background:#000;max-height:260px;object-fit:cover}.scan p{margin:6px 0;font-size:14px;color:var(--mute)}.filebtn{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px;cursor:pointer;font-weight:400}.status{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px}.status b{display:block;font:700 20px/1.2 "Chakra Petch",sans-serif}.status span{color:var(--mute);font-size:14px}
 .card{border:3px solid var(--c);border-radius:16px;background:var(--panel);overflow:hidden;max-width:380px;margin:0 0 12px}
 .ctop{background:var(--c);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:8px 14px}.cn{font:700 20px "Chakra Petch",sans-serif}.ci{font-size:46px;line-height:1}
@@ -56,6 +56,10 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .pile{text-align:center;font-size:13px;color:var(--mute)}.back{width:64px;height:92px;border-radius:8px;background:var(--ink);display:grid;place-items:center;color:var(--bg);font:700 11px "Chakra Petch",sans-serif;letter-spacing:1px;margin-bottom:4px}
 .disc{display:flex;flex-wrap:wrap;gap:6px;color:var(--mute);font-size:14px}
 .mini{width:42px;height:60px;border-radius:6px;border:2px solid var(--c);background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:2px;font-size:11px}.mini b{background:var(--c);color:#fff;width:100%;text-align:center;border-radius:3px}.mini span{font-size:20px}
+.acg{margin:10px 0 4px;font:700 13px "Chakra Petch",sans-serif;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+.acl{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:4px}
+.acl button{display:flex;gap:8px;align-items:center;text-align:left;min-height:38px;padding:4px 8px;font-size:14px}
+.acl b{min-width:34px;font:700 14px "Chakra Petch",sans-serif;color:var(--c)}.acl button.used{opacity:.45;text-decoration:line-through}
 .ovr h2{font-size:20px;margin:14px 0 2px}.ovr p{margin:0 0 10px;color:var(--mute);font-size:14px}
 .teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
 .team{background:var(--panel);border:1px solid var(--line);border-top:5px solid var(--tc);border-radius:12px;padding:12px}.team.act{outline:2px solid var(--tc)}.team.out{opacity:.6}
@@ -85,11 +89,13 @@ button:disabled{opacity:.4;cursor:not-allowed}
 <div id="play" style="display:none">
   <header><div><h1 id="modelbl">Mars Madness</h1><div class="day"><span id="dayn">0</span><small> / 30</small></div></div><div class="num" id="whose"></div></header>
   <div class="die"><div class="dief" id="dief" aria-live="polite">⚀</div><div><button class="primary" id="rollBtn">Roll the die</button><div id="pos"></div></div></div>
+  <div class="manual dice" id="diceIn" style="display:none"><span class="dl">Your own dice</span><button id="dn1" aria-pressed="true">1 die</button><button id="dn2" aria-pressed="false">2 dice</button><input id="d1" type="number" inputmode="numeric" min="1" max="6" placeholder="Die 1" aria-label="Die 1 number"><input id="d2" type="number" inputmode="numeric" min="1" max="6" placeholder="Die 2" aria-label="Die 2 number" style="display:none"><button id="useDie">Use my roll</button></div>
   <div id="board"></div>
   <div class="manual" id="entry"><input id="code" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" placeholder="Card (e.g. 12, Q2, G5, B10)" aria-label="Card number"><button id="goBtn">Show scenario</button><button id="qrBtn" aria-label="Scan a card QR code">Scan QR</button></div>
   <div id="scan" style="display:none" class="scan"><video id="vid" playsinline muted></video><p id="scanmsg" aria-live="polite"></p><div class="srow"><button id="scanStop">Close scanner</button><label class="filebtn">Scan from photo<input type="file" id="qrFile" accept="image/*" capture="environment" hidden></label></div></div>
   <div class="status"><b id="stitle"></b><span id="smsg"></span></div>
   <div id="card"></div>
+  <details class="piles" id="allcards" style="display:none"><summary id="acsum">All cards</summary><div id="acbody"></div></details>
   <details class="piles" id="piles"><summary id="psum"></summary><div id="pbody"></div></details>
   <div class="ovr"><h2>Manual override: Resource settings</h2><p id="ovrnote"></p></div>
   <div class="teams" id="teams"></div>
@@ -251,7 +257,7 @@ const ICO=[
 ["🌞","#b8720c"]];
 const RES=[["oxygen","Oxygen","OXYGEN CRITICAL!"],["water","Water","WATER CRITICAL!"],["food","Food","FOOD CRITICAL!"],["power","Power","POWER CRITICAL!"],["safety","Safety","SAFETY CRITICAL!"],["crew","Crew health","CREW HEALTH CRITICAL!"]];
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
-const fresh=()=>({pick:null,setup:{nt:1,sizes:[1,1]},mode:null,started:false,over:false,winner:null,teams:[],turn:0,deck:[],num:0,picked:true,outcome:"",title:"",msg:"",last:0});
+const fresh=()=>({dice:1,faces:"",pick:null,setup:{nt:1,sizes:[1,1]},mode:null,started:false,over:false,winner:null,teams:[],turn:0,deck:[],num:0,picked:true,outcome:"",title:"",msg:"",last:0});
 let S=fresh();
 try{const t=localStorage.getItem("marsMadness");if(t)S=Object.assign(fresh(),JSON.parse(t));if(S.mode==="phys"&&S.pv!==2)S=fresh()}catch(e){}
 const $=x=>document.getElementById(x);
@@ -346,12 +352,16 @@ function render(){
   $("whose").textContent=S.teams.length>1?t.name+"’s turn":"";
   $("board").style.display=ph?"none":"block";$("entry").style.display=ph?"flex":"none";if(!ph&&$("scan"))qrStop();
   $("pos").textContent=(S.teams.length>1?t.name+"’s turn · ":"")+(ph?"":"Space "+cellOf(me)+(me>30?" · lap "+(Math.floor((me-1)/30)+1):"")+" · ")+(S.last?"last roll "+S.last:"no rolls yet");
-  $("dief").textContent=FACES[S.last?S.last-1:0];
+  $("dief").textContent=S.faces||FACES[S.last?S.last-1:0];$("diceIn").style.display=ph?"flex":"none";setDice(S.dice===2?2:1);$("rollBtn").textContent=ph&&S.dice===2?"Roll both dice":"Roll the die";
   $("stitle").textContent=S.title;$("smsg").textContent=S.msg;
   $("card").innerHTML=S.num?cardHTML(S.num)+(PH()?"":lessonHTML(S.num)+nasaBox(S.num))+choiceHTML():"";
   if(!ph)$("board").innerHTML=boardHTML();
   $("psum").textContent="Cards & discards"+(S.teams.length>1?" · "+t.name:"")+" · "+(ph?"":(dk(t).length-t.dp)+" in deck · ")+t.used.length+" discarded";
   $("pbody").innerHTML=(ph?"":'<div class="pile"><div class="back">MARS</div>'+(dk(t).length-t.dp)+' left</div>')+'<div class="disc">'+(t.used.length?t.used.map(miniHTML).join(""):'No discards yet')+'</div>';
+  $("allcards").style.display=ph?"block":"none";
+  if(ph){const used=t.used,grp=[["Problem cards",c=>/^\d/.test(c.c)],["Quiet days",c=>c.k==="Q"],["Good news",c=>c.k==="G"],["Bad news",c=>c.k==="B"]];
+    $("acsum").textContent="All cards · "+PC.length+" ("+used.length+" used by "+t.name+")";
+    $("acbody").innerHTML=grp.map(([n,fn])=>'<div class="acg">'+n+'</div><div class="acl">'+PC.map((c,i)=>fn(c)?'<button data-card="'+c.c+'" style="--c:'+PCOL[c.k]+'"'+(used.includes(i+1)?' class="used" title="Already played"':'')+'><b>'+esc(pcode(c))+'</b>'+esc(c.t)+'</button>':"").join("")+'</div>').join("")}
   $("ovrnote").textContent=locked()?"Locked. Resources now change only through scenario choices.":"Set starting resources before day 1. This locks once the first scenario is resolved.";
   $("teams").innerHTML=S.teams.map(teamHTML).join("");
   $("end").style.display=S.over?"flex":"none";if(S.over)$("endbox").innerHTML=endHTML();
@@ -385,19 +395,34 @@ function choose(k){
 const dk=t=>t.deck||S.deck;
 function draw(t){const i=dk(t)[t.dp];t.dp++;S.num=i+1;S.picked=false;S.outcome="";if(isQ(S.num))settle(null)}
 let rolling=false;
+const nd=()=>S.mode==="phys"?(S.dice===2?2:1):1;
+function finishRoll(vals){
+  const t=T(),n=vals.reduce((a,b)=>a+b,0),ph=S.mode==="phys";
+  S.last=n;S.faces=vals.map(v=>FACES[v-1]).join(" ");t.pos[t.mi]+=n;S.num=0;
+  S.title=(S.teams.length>1?t.name+" rolled ":"You rolled ")+(vals.length>1?vals.join(" + ")+" = "+n:"a "+n);
+  if(ph)S.msg="Move "+n+" space"+(n>1?"s":"")+" on your board, then enter the number on the card you draw.";
+  else{S.msg="Move "+n+" space"+(n>1?"s":"")+" to space "+cellOf(t.pos[t.mi])+". A card was drawn from the deck.";draw(t)}
+}
 $("rollBtn").onclick=()=>{
   if(rolling||S.over||!S.started)return;
-  if(S.num&&!S.picked){S.title="Pick an option first";S.msg="Choose how your crew responds to card "+S.num+" below, then roll again.";render();const c=$("card");if(c&&c.scrollIntoView)c.scrollIntoView({block:"center",behavior:"smooth"});return}
+  if(S.num&&!S.picked){S.title="Pick an option first";S.msg="Choose how your crew responds to card "+(PH()?pcode(PC[S.num-1]):S.num)+" below, then roll again.";render();const c=$("card");if(c&&c.scrollIntoView)c.scrollIntoView({block:"center",behavior:"smooth"});return}
   rolling=true;
-  const iv=setInterval(()=>{$("dief").textContent=FACES[Math.floor(Math.random()*6)]},70);
+  const k=nd();
+  const iv=setInterval(()=>{$("dief").textContent=Array.from({length:k},()=>FACES[Math.floor(Math.random()*6)]).join(" ")},70);
   const unlock=setTimeout(()=>{rolling=false;clearInterval(iv)},3000);
   setTimeout(()=>{try{clearInterval(iv);clearTimeout(unlock);
-    const t=T(),n=1+Math.floor(Math.random()*6),ph=S.mode==="phys";
-    S.last=n;t.pos[t.mi]+=n;S.num=0;
-    S.title=(S.teams.length>1?t.name+" rolled a ":"You rolled a ")+n;
-    if(ph)S.msg="Move "+n+" space"+(n>1?"s":"")+" on your board, then enter the number on the card you draw.";
-    else{S.msg="Move "+n+" space"+(n>1?"s":"")+" to space "+cellOf(t.pos[t.mi])+". A card was drawn from the deck.";draw(t)}
+    finishRoll(Array.from({length:k},()=>1+Math.floor(Math.random()*6)));
     }finally{rolling=false;render()}},700);
+};
+function setDice(n){S.dice=n;$("dn1").setAttribute("aria-pressed",n===1);$("dn2").setAttribute("aria-pressed",n===2);$("d2").style.display=n===2?"":"none";if(n===1)$("d2").value=""}
+$("dn1").onclick=()=>{setDice(1);save()};$("dn2").onclick=()=>{setDice(2);save()};
+$("useDie").onclick=()=>{
+  if(rolling||S.over||!S.started||S.mode!=="phys")return;
+  if(S.num&&!S.picked){S.title="Pick an option first";S.msg="Choose how your crew responds to card "+pcode(PC[S.num-1])+" below, then enter your roll.";render();return}
+  const ids=nd()===2?["d1","d2"]:["d1"],vals=ids.map(x=>Number($(x).value));
+  if(vals.some(v=>!Number.isInteger(v)||v<1||v>6)){S.title="Check your dice";S.msg="Type each die as a number from 1 to 6.";render();return}
+  ids.forEach(x=>$(x).value="");
+  finishRoll(vals);render();
 };
 function play(raw){
   if(S.over||S.mode!=="phys")return;
@@ -435,6 +460,7 @@ $("qrFile").onchange=async e=>{
 
 $("goBtn").onclick=()=>{play($("code").value);$("code").value=""};
 $("code").addEventListener("keydown",e=>{if(e.key==="Enter")$("goBtn").click()});
+$("acbody").addEventListener("click",e=>{const b=e.target.closest("[data-card]");if(!b)return;if(S.num&&!S.picked){S.title="Pick an option first";S.msg="Choose how your crew responds to the current card, then enter the next one.";render();return}play(b.dataset.card);window.scrollTo&&window.scrollTo({top:0,behavior:"smooth"})});
 $("card").addEventListener("click",e=>{const b=e.target.closest("[data-c]");if(b)choose(+b.dataset.c)});
 $("teams").addEventListener("click",e=>{
   const b=e.target.closest("button[data-d]");if(!b||locked()||S.over)return;
@@ -473,7 +499,7 @@ $("startBtn").onclick=()=>{
   const base=()=>shuffle(Array.from({length:30},(_,i)=>i));
   S.teams.forEach((tm,i)=>{let d=base();if(i>0){const prev=S.teams[i-1].deck;let n=0;while(n++<500&&d.some((v,k)=>v===prev[k]))d=base();if(d.some((v,k)=>v===prev[k]))d=prev.map((_,k)=>prev[(k+1)%30])}tm.deck=d});
   S.deck=S.teams[0].deck;
-  S.turn=0;S.started=true;S.over=false;S.winner=null;S.num=0;S.picked=true;S.last=0;S.outcome="";
+  S.faces="";S.dice=S.mode==="phys"?(S.dice===2?2:1):1;S.turn=0;S.started=true;S.over=false;S.winner=null;S.num=0;S.picked=true;S.last=0;S.outcome="";
   S.title="Mission start";
   S.msg=S.mode==="phys"?"Roll the die, move, then enter the number on the card you draw.":"Roll the die. Your piece moves and a card is drawn automatically.";
   showPlay();render();
