@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mars Madness</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔴</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3ece4;--panel:#fffaf4;--ink:#2a1d16;--mute:#7a6558;--line:#e0d2c4;--ok:#1d8f6e;--warn:#c27a10;--bad:#c9382a;--btn:#2a1d16;--btnink:#fffaf4;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17110e;--panel:#241b16;--ink:#f1e5d6;--mute:#a8917f;--line:#3a2c24;--ok:#5fd0a8;--warn:#f2a93b;--bad:#ff6b57;--btn:#f1e5d6;--btnink:#17110e}}
+:root[data-theme="dark"]{--bg:#17110e;--panel:#241b16;--ink:#f1e5d6;--mute:#a8917f;--line:#3a2c24;--ok:#5fd0a8;--warn:#f2a93b;--bad:#ff6b57;--btn:#f1e5d6;--btnink:#17110e}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "IBM Plex Sans",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:16px}
+h1,h2,h3,.num{font-family:"Chakra Petch","Arial Narrow",sans-serif}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px}
+header h1{font-size:15px;margin:0 0 4px;color:var(--mute);font-weight:600}
+.day{font:700 56px/1 "Chakra Petch",sans-serif;letter-spacing:-1px}.day small{font-size:20px;color:var(--mute);font-weight:600;letter-spacing:0}
+#whose{font-size:18px;color:var(--mute);text-align:right}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:10px 12px;min-height:44px}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+.primary{background:var(--btn);color:var(--btnink);border-color:var(--btn);font-weight:600;width:100%;font-size:18px}
+.ts{min-height:80vh;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:14px}
+.ts h1{font:700 clamp(52px,17vw,100px)/.95 "Chakra Petch",sans-serif;margin:0;letter-spacing:-2px}
+.ts>p{font-size:19px;color:var(--mute);margin:0;max-width:30ch}
+.planet{width:88px;height:88px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#e8955f,#b0472b 58%,#5b2314)}
+.modes{display:grid;gap:8px;width:100%;max-width:420px}
+.mode{text-align:left;padding:12px 14px}.mode b{display:block;font:700 18px "Chakra Petch",sans-serif}.mode span{color:var(--mute);font-size:14px}
+.mode[aria-pressed=true]{background:var(--btn);color:var(--btnink)}.mode[aria-pressed=true] span{color:inherit;opacity:.8}
+.setup{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+.srow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;font-weight:600}.srow>span{min-width:120px}.srow em{color:var(--mute);font-size:13px;font-style:normal;font-weight:400}
+.srow button{min-width:44px}.srow button[aria-pressed=true]{background:var(--btn);color:var(--btnink)}
+.ts .setup p{font-size:14px;max-width:none;margin:0;color:var(--mute)}
+#startBtn,#contBtn{max-width:420px}
+.die{display:flex;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}.die>div:last-child{flex:1}.dief{font-size:76px;line-height:1;min-width:84px;text-align:center}#pos{color:var(--mute);margin-top:6px;font-size:14px}
+.start{display:flex;align-items:center;gap:6px;min-height:34px;padding:4px 8px;margin-bottom:6px;background:var(--panel);border:1px dashed var(--line);border-radius:10px;font:700 14px "Chakra Petch",sans-serif}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;max-width:640px}
+.cell{aspect-ratio:1;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px;display:flex;flex-wrap:wrap;align-content:flex-end;gap:2px;position:relative}
+.cell i{position:absolute;top:3px;left:5px;font:600 11px "IBM Plex Sans",sans-serif;font-style:normal;color:var(--mute)}
+.tok{width:20px;height:20px;border-radius:50%;color:#fff;font:700 12px/20px "Chakra Petch",sans-serif;text-align:center;box-shadow:0 0 0 2px var(--panel)}.tok.on{box-shadow:0 0 0 2px var(--ink)}
+#board{margin-bottom:12px}
+.manual{display:flex;gap:8px;margin-bottom:12px}.manual input{flex:1;min-width:0;font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink)}
+.status{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px}.status b{display:block;font:700 20px/1.2 "Chakra Petch",sans-serif}.status span{color:var(--mute);font-size:14px}
+.card{border:3px solid var(--c);border-radius:16px;background:var(--panel);overflow:hidden;max-width:380px;margin:0 0 12px}
+.ctop{background:var(--c);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:8px 14px}.cn{font:700 20px "Chakra Petch",sans-serif}.ci{font-size:46px;line-height:1}
+.cb{padding:12px 14px}.cb h3{margin:0 0 6px;font-size:20px;color:var(--c)}.cb p{margin:0}
+.lesson{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.lesson h3{margin:0 0 4px;font-size:16px}.lesson p{margin:0}
+.choice{display:block;width:100%;text-align:left;margin-top:8px;font-weight:600}.choice small{display:block;color:var(--mute);font-weight:500;margin-top:2px}.outcome{margin-top:12px;padding:10px;border-radius:10px;background:var(--panel);border:1px solid var(--line);font-weight:600}
+.piles{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:12px 0}.piles summary{cursor:pointer;font-weight:600;min-height:32px;display:flex;align-items:center}
+#pbody{display:flex;gap:12px;align-items:flex-start;margin-top:8px}
+.pile{text-align:center;font-size:13px;color:var(--mute)}.back{width:64px;height:92px;border-radius:8px;background:var(--ink);display:grid;place-items:center;color:var(--bg);font:700 11px "Chakra Petch",sans-serif;letter-spacing:1px;margin-bottom:4px}
+.disc{display:flex;flex-wrap:wrap;gap:6px;color:var(--mute);font-size:14px}
+.mini{width:42px;height:60px;border-radius:6px;border:2px solid var(--c);background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:2px;font-size:11px}.mini b{background:var(--c);color:#fff;width:100%;text-align:center;border-radius:3px}.mini span{font-size:20px}
+.ovr h2{font-size:20px;margin:14px 0 2px}.ovr p{margin:0 0 10px;color:var(--mute);font-size:14px}
+.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.team{background:var(--panel);border:1px solid var(--line);border-top:5px solid var(--tc);border-radius:12px;padding:12px}.team.act{outline:2px solid var(--tc)}.team.out{opacity:.6}
+.th{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.th h2{margin:0;font-size:20px;color:var(--tc)}.th span{font-size:13px;color:var(--mute)}
+.track{height:6px;background:var(--line);border-radius:3px;margin:8px 0;overflow:hidden}.track i{display:block;height:100%;background:var(--tc)}
+.rr{margin-bottom:10px}.rl{display:flex;justify-content:space-between;font-size:15px}
+.bar{height:10px;background:var(--line);border-radius:5px;margin:4px 0;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok);transition:width .25s}.low .bar i{background:var(--bad)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.steps button{padding:4px;min-height:34px;font-weight:600}
+.warn{font-weight:600;color:var(--bad);font-size:13px}
+.reset{margin-top:16px;width:100%;color:var(--mute)}
+.end{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.endbox{background:var(--panel);color:var(--ink);border-radius:16px;padding:20px;max-width:440px;width:100%}.endbox h2{margin:0 0 10px;font-size:28px;line-height:1.1}
+.endbox ul{list-style:none;padding:0;margin:0 0 16px}.endbox li{border-left:5px solid var(--tc);padding:6px 10px;margin-bottom:6px;background:var(--bg);border-radius:6px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<section class="ts" id="titlescreen">
+  <div class="planet" aria-hidden="true"></div><h1>Mars Madness</h1>
+  <p>Thirty days on Mars. Every decision costs something.</p>
+  <div class="modes" id="modes"></div><div id="setup" style="width:100%"></div>
+  <button class="primary" id="startBtn" disabled>Start mission</button>
+  <button id="contBtn" style="display:none;width:100%">Continue mission</button>
+</section>
+<div id="play" style="display:none">
+  <header><div><h1 id="modelbl">Mars Madness</h1><div class="day"><span id="dayn">0</span><small> / 30</small></div></div><div class="num" id="whose"></div></header>
+  <div class="die"><div class="dief" id="dief" aria-live="polite">⚀</div><div><button class="primary" id="rollBtn">Roll the die</button><div id="pos"></div></div></div>
+  <div id="board"></div>
+  <div class="manual" id="entry"><input id="code" type="text" inputmode="numeric" placeholder="Card number (1–30)" aria-label="Card number"><button id="goBtn">Show scenario</button></div>
+  <div class="status"><b id="stitle"></b><span id="smsg"></span></div>
+  <div id="card"></div>
+  <details class="piles" id="piles"><summary id="psum"></summary><div id="pbody"></div></details>
+  <div class="ovr"><h2>Manual override: Resource settings</h2><p id="ovrnote"></p></div>
+  <div class="teams" id="teams"></div>
+  <button class="reset" id="resetBtn">New mission</button>
+</div>
+</main>
+<div class="end" id="end" role="dialog" aria-modal="true" aria-label="Mission result"><div class="endbox" id="endbox"></div></div>
+<script>
+const CARDS=["LIVING WITH THE SAME PEOPLE","STAYING IN SHAPE","MISSING SOCIETY AND FREEDOM","SLEEP PROBLEMS","HABITAT AIR LEAK","NO AIR!","FUNGUS ON PLANTS","RUNNING OUT OF FOOD","FOOD LIMITATIONS","FROZEN WATER PIPE","KEEP CLEAN","WATER MANAGEMENT","TECHNICAL DIFFICULTIES","LIMITED RESOURCES","POWER PROBLEMS","METEORITE DAMAGE","BROKEN HAZARD EQUIPMENT","EXTREME TEMPERATURES ON MARS","EARTH DOESN’T ANSWER IN AN EMERGENCY","COMMUNICATION DELAYS","NAVIGATION PROBLEMS","EXTREME TEMPERATURES IN SPACE"];
+while(CARDS.length<30)CARDS.push("ALL SYSTEMS NORMAL");
+const id=n=>"CARD"+String(n+1).padStart(2,"0");
+const LESSON=[
+"Crews live for months in a small space with the same few people, and they train together for years first. Small irritations grow, so astronauts talk early, share chores fairly and give each other room. When you decide, protect the team before you try to win the argument.",
+"In low gravity muscles and bones weaken, so astronauts on the space station exercise about two hours a day. They treat it as part of the job, not a bonus. When you decide, keep health routines going even when the day is busy.",
+"Astronauts miss family, fresh air and privacy. They keep in touch with scheduled calls and messages, and they keep hobbies. Feeling isolated is expected, not a failure. When you decide, keep the crew connected and let people talk about how they feel.",
+"Sleep is hard in space: no real day and night, noise, and the odd feeling of floating. Crews keep fixed sleep times and dim the lights. Tired people make mistakes. When you decide, make sure everyone is rested before a risky job.",
+"A leak is one of the most serious problems a crew can face. They are trained to find the source, isolate that section and watch the air pressure. When you decide, protect the air first, fix the leak second and never panic.",
+"Astronauts rehearse emergencies again and again, so when one happens they follow steps they already know. Calm comes from practice. When you decide, get people to safety first and equipment second.",
+"Growing plants is real space research, and fresh food lifts a crew’s mood. But mold and plant disease are real risks in closed habitats. When you decide, act early so a small problem does not spread, and never rely on a single food source.",
+"Missions are planned with a safety margin of food, and nothing can be delivered quickly from Earth. Crews track what is left. When you decide, ration early and evenly instead of waiting until the supplies are gone.",
+"Space food is mostly packaged and repetitive, and eating takes planning. Variety and small treats matter for morale. When you decide, balance nutrition with a little variety so the crew stays healthy and motivated.",
+"Cold makes equipment fail, and water is life support. The space station recycles most of its water, even from sweat and breath moisture. When you decide, protect your water first, thaw and fix carefully, and then conserve.",
+"There are no showers on the space station. Astronauts use wipes and rinse-free soap, and cleaning is scheduled to keep air filters, surfaces and germs under control. When you decide, small hygiene habits prevent bigger health problems.",
+"Every drop of water in space is recycled and tracked. Crews measure how much they use and waste as little as possible. When you decide, conserve, recycle and keep a record so you know how much is really left.",
+"Equipment breaks, so astronauts are trained to be repair crews, and they work with engineers on the ground. They stop, diagnose, then fix. When you decide, understand the problem before acting and repair whatever endangers life first.",
+"Everything a crew needs is brought with them. There is no store to order from. Astronauts plan, track and prioritize. When you decide, spend resources on what keeps the crew alive before anything that is only nice to have.",
+"Power runs the air, heat, water and radio. When power drops, crews shut down non-essential systems first. When you decide, keep life support running and switch off the extras until power recovers.",
+"Space dust and small rocks are a real risk, and spacecraft carry shielding. Mars has a thin atmosphere that offers little protection. Crews check for damage, seal any breach, then repair. When you decide, inspect first, seal second, repair third.",
+"Safety gear like alarms and suits is inspected regularly because it matters most when everything else goes wrong. When you decide, fix safety equipment before other repairs and never skip a safety check to save time.",
+"Mars is very cold on average, so habitats need heating and spacesuits need careful planning. Astronauts schedule outdoor work around conditions. When you decide, wait out dangerous weather if you can and avoid unnecessary risks.",
+"On Mars, crews cannot count on instant help from Earth, so they train to make decisions themselves using checklists and teamwork. When you decide, rely on your training, pick the safest option, and report it to Earth afterward.",
+"A signal between Earth and Mars takes minutes each way, so there is no quick back-and-forth. Crews send complete, clear messages and keep working while they wait. When you decide, be clear and thorough, and do not stall waiting for an answer.",
+"Astronauts double-check where they are, keep backup methods and do not work alone. When you decide, stop, verify your position, use your backup and stay together.",
+"In space the sunlit side of a spacecraft gets very hot and the shaded side gets very cold. Thermal systems and suit cooling manage it. When you decide, deal with heat and cold together and protect the people before the equipment.",
+"Calm days still matter. Crews use quiet time to inspect equipment, do maintenance, rest and train. Use calm days to recover, repair and prepare for the next problem."];
+const DESC=[
+'Weeks into the mission, small habits are starting to grate. Tools get left out, someone is always loud, and tempers are short in the cramped habitat.',
+'Low gravity is making everyone feel weaker. The exercise gear is ready, but the repair list is long and there is little spare time.',
+'The crew is lonely. Everyone misses family, friends and open skies, and the days all feel the same inside the habitat walls.',
+'The habitat is noisy, the lights stay on, and a Martian day runs a little longer than an Earth day. Crew members are lying awake and getting tired.',
+'An alarm sounds. Air pressure in one module is slowly dropping, and a faint hiss is coming from somewhere near the wall.',
+'The oxygen alarm blares as levels fall fast. The crew has only minutes to act before breathing gets difficult.',
+'White fuzzy mold is spreading across the vegetable crop. If it keeps going, the garden that feeds the crew could be lost.',
+'A count of the pantry shows less food than planned. The next supply ship is months away, so the crew must decide how to stretch what is left.',
+'Meals have become the same few packaged dishes. Morale is dropping and some crew members are skipping meals.',
+'A freezing night has frozen part of the water line, and water has stopped flowing into the habitat tanks.',
+'Red dust is on everything and there is no shower. Dirty filters and surfaces have the crew worried about germs.',
+'Water use has crept above plan. The recycler is working hard and the tanks are lower than expected.',
+'A key system crashes and the control panel fills with error codes. Nobody is sure what is wrong, and the crew has to decide how to fix it.',
+'Supplies are running lower than planned across the board, and the crew cannot cover every need. They must decide what comes first.',
+'The solar panels are producing less power than expected, and the batteries are draining faster than planned.',
+'A loud bang echoes through the habitat. A small meteorite has hit the outer wall, and the crew does not know how far the damage goes.',
+'During a routine check the crew finds a dead alarm and a cracked helmet visor. The gear meant to keep them safe cannot be trusted.',
+'A bitter cold snap hits the surface. The habitat heaters struggle, and going outside is dangerous.',
+'An emergency strikes and the crew calls Mission Control. There is no reply, and every minute counts.',
+'A message to Earth takes many minutes each way. The crew needs advice now, but there can be no real conversation.',
+'Dust and glitches make the maps unreliable. A team out on the surface is not sure of the way back to the habitat.',
+'In flight, the sunlit side of the ship is overheating while the shaded side freezes, and some systems start acting strangely.',
+'A quiet day. Every system reads normal and nothing needs urgent attention. It is a chance to catch your breath.'];
+const descHTML=n=>'<p class="desc">'+DESC[Math.min(n,DESC.length)-1]+'</p>';
+function lessonHTML(n){return '<div class="lesson"><h3>Astronaut life lesson</h3><p>'+LESSON[Math.min(n,LESSON.length)-1]+'</p></div>'}
+const CHOICES=[
+[['Hold a crew meeting and rebalance chores',{crew:10,safety:-5}],['Ignore it and keep working',{safety:5,crew:-10}]],
+[['Do the full exercise routine',{crew:10,food:-5}],['Skip exercise to finish repairs',{safety:5,crew:-10}]],
+[['Use power for a video call to Earth',{crew:10,power:-10}],['Save power and stay quiet',{power:5,crew:-10}]],
+[['Enforce a full rest shift',{crew:10,safety:-5}],['Work through the night',{safety:10,crew:-10}]],
+[['Patch the leak now with emergency sealant',{oxygen:10,power:-10}],['Seal off the module and abandon it',{safety:5,oxygen:-10}]],
+[['Switch to emergency oxygen tanks',{oxygen:15,safety:-10}],['Start the backup air scrubber',{oxygen:10,power:-10}]],
+[['Cut out and burn the infected plants',{safety:5,food:-10}],['Treat the plants and keep growing',{food:5,water:-10}]],
+[['Strict rations for everyone',{food:10,crew:-10}],['Open the emergency food reserve',{food:15,safety:-10}]],
+[['Share a special meal',{crew:10,food:-10}],['Stick to plain rations',{food:5,crew:-5}]],
+[['Heat the pipe back up',{water:10,power:-10}],['Shut the pipe off and use stored water',{safety:5,water:-10}]],
+[['Do a full cleaning day',{safety:10,water:-10}],['Wipe down quickly and move on',{water:5,safety:-10}]],
+[['Recycle harder and shorten washing',{water:10,crew:-10}],['Use water as normal',{crew:5,water:-10}]],
+[['Run full diagnostics before fixing',{safety:10,power:-10}],['Try a quick patch',{power:5,safety:-10}]],
+[['Put water first',{water:10,food:-10}],['Put food first',{food:10,oxygen:-10}]],
+[['Switch off non-essential systems',{power:10,crew:-5}],['Keep everything running',{crew:5,power:-10}]],
+[['Inspect the whole hull, then seal',{safety:10,power:-5}],['Seal the loudest leak and move on',{oxygen:10,safety:-10}]],
+[['Repair alarms and suits first',{safety:15,power:-10}],['Finish chores and fix safety gear later',{power:5,safety:-10}]],
+[['Stay inside and heat the habitat',{safety:10,power:-5}],['Go out to harvest ice for water',{water:10,safety:-10}]],
+[['Follow the emergency checklist yourselves',{safety:10,crew:-5}],['Wait for Earth to reply',{crew:5,safety:-10}]],
+[['Send one detailed message and keep working',{safety:10,power:-5}],['Wait by the radio',{power:5,safety:-10}]],
+[['Stop and use backup beacons',{safety:10,power:-10}],['Keep going by sight to save time',{crew:5,safety:-10}]],
+[['Run the heating and cooling systems',{safety:10,power:-10}],['Add extra layers and save power',{power:5,crew:-10}]],
+[['Rest and recover',{crew:10,safety:-5}],['Do maintenance and safety checks',{safety:10,crew:-5}]]];
+const THIRD=[
+['Set up separate quiet hours',{crew:5,power:-5}],
+['Do a short workout and keep repairing',{crew:5,safety:-5}],
+['Hold a crew movie night',{crew:5,power:-5}],
+['Sleep in two shifts so someone is always on watch',{safety:5,crew:-5}],
+['Plug it with spare supplies and watch the pressure',{oxygen:5,safety:-5}],
+['Move everyone into the smallest sealed room',{oxygen:5,crew:-5}],
+['Isolate the plants and test a sample',{safety:5,water:-5}],
+['Ask Earth for a faster supply plan',{food:5,power:-5}],
+['Swap meals so everyone gets some variety',{crew:5,food:-5}],
+['Wrap the pipe and thaw it slowly',{water:5,power:-5}],
+['Clean the air filters only',{safety:5,crew:-5}],
+['Fix small leaks and track every drop',{water:5,safety:-5}],
+['Ask Earth for help with the repair',{safety:5,crew:-5}],
+['Put power first',{power:10,water:-10}],
+['Switch to the backup generator',{power:5,safety:-5}],
+['Cover the damage with a temporary patch',{oxygen:5,power:-5}],
+['Test only the suits',{safety:5,crew:-5}],
+['Send one rover out to check conditions',{water:5,power:-5}],
+['Split the crew: half follow the checklist, half try Earth',{safety:5,crew:-5}],
+['Send a short update and check back later',{crew:5,safety:-5}],
+['Mark a safe route and turn back',{safety:5,oxygen:-5}],
+['Rotate the ship to shade the hot side',{power:5,safety:-5}],
+['Take a short rest and fix one small thing',{crew:5,power:-5}]];
+THIRD.forEach((t,i)=>CHOICES[i].push(t));
+const TC=["#d6452d","#2f6fd6"],NAMES=["Team A","Team B"],FACES="⚀⚁⚂⚃⚄⚅";
+const MODES=[["phys","Physical board game","Use your own board and cards. The die and resources are digital."],["online","All-online","Board, cards and pieces all on screen, for one or two teams."],["solo","Solo","A game for one player with the full online board."]];
+const ICO=[["👥","#8e5bd6"],["🏋️","#8e5bd6"],["🌍","#8e5bd6"],["😴","#8e5bd6"],["💨","#2f6fd6"],["🆘","#c9382a"],["🍄","#1f9a68"],["🥫","#1f9a68"],["🍽️","#1f9a68"],["🧊","#1b8fa0"],["🧼","#1b8fa0"],["💧","#1b8fa0"],["🔧","#b8720c"],["📦","#b8720c"],["🔋","#b8720c"],["☄️","#c9382a"],["🚨","#c9382a"],["🥶","#4f86c6"],["📡","#148f8f"],["⏳","#148f8f"],["🧭","#148f8f"],["🔥","#d9622b"],["✅","#1f9a68"]];
+const RES=[["oxygen","Oxygen","OXYGEN CRITICAL!"],["water","Water","WATER CRITICAL!"],["food","Food","FOOD CRITICAL!"],["power","Power","POWER CRITICAL!"],["safety","Safety","SAFETY CRITICAL!"],["crew","Crew health","CREW HEALTH CRITICAL!"]];
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const fresh=()=>({pick:null,setup:{nt:1,sizes:[1,1]},mode:null,started:false,over:false,winner:null,teams:[],turn:0,deck:[],num:0,picked:true,outcome:"",title:"",msg:"",last:0});
+let S=fresh();
+try{const t=localStorage.getItem("marsMadness");if(t)S=Object.assign(fresh(),JSON.parse(t))}catch(e){}
+const $=x=>document.getElementById(x);
+const save=()=>{try{localStorage.setItem("marsMadness",JSON.stringify(S))}catch(e){}};
+const T=()=>S.teams[S.turn];
+const locked=()=>S.teams.some(t=>t.day>=1);
+const cellOf=p=>p===0?0:((p-1)%30)+1;
+const ico=n=>ICO[Math.min(n,ICO.length)-1];
+const fx=e=>RES.filter(([k])=>e[k]).map(([k,n])=>(e[k]>0?'+':'−')+Math.abs(e[k])+' '+n).join(' · ');
+function cardHTML(n){const [e,c]=ico(n);return '<div class="card" style="--c:'+c+'"><div class="ctop"><span class="cn">Card '+n+'</span><span class="ci" aria-hidden="true">'+e+'</span></div><div class="cb"><h3>'+CARDS[n-1]+'</h3><p>'+DESC[Math.min(n,DESC.length)-1]+'</p></div></div>'}
+function miniHTML(n){const [e,c]=ico(n);return '<div class="mini" style="--c:'+c+'" title="Card '+n+': '+CARDS[n-1]+'"><b>'+n+'</b><span>'+e+'</span></div>'}
+function choiceHTML(){
+  if(S.picked)return S.outcome?'<div class="outcome">'+S.outcome+'</div>':'';
+  const set=CHOICES[Math.min(S.num,CHOICES.length)-1];
+  return '<div class="lesson"><h3>What does the crew do?</h3>'+set.map((o,k)=>'<button class="choice" data-c="'+k+'">'+o[0]+'<small>'+fx(o[1])+'</small></button>').join('')+'</div>';
+}
+function tokens(s){let h="";S.teams.forEach((t,i)=>t.pos.forEach((p,m)=>{if(cellOf(p)===s)h+='<span class="tok'+(i===S.turn&&m===t.mi?' on':'')+'" style="background:'+TC[i]+'" title="'+t.name+'">'+"AB"[i]+'</span>'}));return h}
+function boardHTML(){
+  let h='<div class="start">Start '+tokens(0)+'</div><div class="grid">';
+  for(let s=1;s<=30;s++){const r=Math.floor((s-1)/6),c=(s-1)%6,col=r%2?5-c:c;
+    h+='<div class="cell" style="grid-row:'+(r+1)+';grid-column:'+(col+1)+'"><i>'+s+'</i>'+tokens(s)+'</div>'}
+  return h+'</div>';
+}
+function teamHTML(t,i){
+  const off=locked()||S.over;
+  let h='<section class="team'+(i===S.turn&&!S.over?' act':'')+(t.out?' out':'')+'" style="--tc:'+TC[i]+'"><div class="th"><h2>'+t.name+'</h2><span>'+(t.out?'OUT · '+t.why:'Day '+t.day+' / 30')+' · '+t.size+(t.size>1?' members':' member')+'</span></div><div class="track"><i style="width:'+(t.day/30*100)+'%"></i></div>';
+  RES.forEach(([k,n,w])=>{const v=t.r[k],low=v<=t.max*0.2;
+    h+='<div class="rr'+(low?' low':'')+'"><div class="rl"><span>'+n+'</span><b>'+v+' / '+t.max+'</b></div><div class="bar"><i style="width:'+(v/t.max*100)+'%"></i></div><div class="steps">'+
+    [-10,-5,5,10].map(d=>'<button data-t="'+i+'" data-k="'+k+'" data-d="'+d+'" aria-label="'+t.name+' '+n+(d>0?' plus ':' minus ')+Math.abs(d)+'"'+(off?' disabled':'')+'>'+(d>0?'+':'−')+Math.abs(d)+'</button>').join('')+'</div>'+(low?'<div class="warn">'+w+'</div>':'')+'</div>'});
+  return h+'</section>';
+}
+function endHTML(){
+  const w=S.winner,multi=S.teams.length>1,sc=t=>RES.reduce((a,[k])=>a+t.r[k],0);
+  const head=w!==null?(multi?S.teams[w].name+" survived 30 days first!":"Mission complete! You survived 30 days."):(multi?"No team survived.":"Mission failed.");
+  return '<h2>'+head+'</h2><ul>'+S.teams.map((t,i)=>'<li style="--tc:'+TC[i]+'"><b>'+t.name+'</b> · '+(t.out?'out on day '+t.day+' ('+t.why+')':'day '+t.day+' of 30')+' · score '+sc(t)+'</li>').join('')+'</ul><button class="primary" id="endNew">New mission</button>';
+}
+function render(){
+  if(!S.started)return;
+  const t=T(),ph=S.mode==="phys",me=t.pos[t.mi];
+  $("modelbl").textContent="Mars Madness · "+MODES.find(m=>m[0]===S.mode)[1];
+  $("dayn").textContent=t.day;
+  $("whose").textContent=S.teams.length>1?t.name+"’s turn":"";
+  $("board").style.display=ph?"none":"block";$("entry").style.display=ph?"flex":"none";
+  $("pos").textContent=(S.teams.length>1?t.name+"’s turn · ":"")+(ph?"":"Space "+cellOf(me)+(me>30?" · lap "+(Math.floor((me-1)/30)+1):"")+" · ")+(S.last?"last roll "+S.last:"no rolls yet");
+  $("dief").textContent=FACES[S.last?S.last-1:0];
+  $("stitle").textContent=S.title;$("smsg").textContent=S.msg;
+  $("card").innerHTML=S.num?cardHTML(S.num)+lessonHTML(S.num)+choiceHTML():"";
+  if(!ph)$("board").innerHTML=boardHTML();
+  $("psum").textContent="Cards & discards"+(S.teams.length>1?" · "+t.name:"")+" · "+(ph?"":(30-t.dp)+" in deck · ")+t.used.length+" discarded";
+  $("pbody").innerHTML=(ph?"":'<div class="pile"><div class="back">MARS</div>'+(30-t.dp)+' left</div>')+'<div class="disc">'+(t.used.length?t.used.map(miniHTML).join(""):'No discards yet')+'</div>';
+  $("ovrnote").textContent=locked()?"Locked. Resources now change only through scenario choices.":"Set starting resources before day 1. This locks once the first scenario is resolved.";
+  $("teams").innerHTML=S.teams.map(teamHTML).join("");
+  $("end").style.display=S.over?"flex":"none";if(S.over)$("endbox").innerHTML=endHTML();
+  save();
+}
+function nextTurn(){
+  let k=S.turn;do{k=(k+1)%S.teams.length}while(S.teams[k].out);
+  S.turn=k;
+}
+const DRAIN=5,QUIET=23;
+function settle(o){
+  const t=T();
+  if(o)RES.forEach(([key])=>{const d=o[1][key];if(d)t.r[key]=Math.max(0,Math.min(t.max,t.r[key]+d))});
+  RES.forEach(([key])=>{t.r[key]=Math.max(0,t.r[key]-DRAIN)});
+  t.day++;t.used.push(S.num);S.picked=true;
+  S.outcome=(o?(S.teams.length>1?t.name+' chose ':'You chose ')+'“'+o[0]+'”: '+fx(o[1])+' · ':'A quiet day: no decisions to make. ')+'Daily use: −'+DRAIN+' of every resource.';
+  const z=RES.find(([key])=>t.r[key]===0);
+  if(z){t.out=true;t.why=z[1]+" ran out"}
+  if(!t.out&&t.day>=30){S.winner=S.turn;S.over=true}
+  else if(S.teams.every(x=>x.out))S.over=true;
+  if(!S.over)nextTurn();
+  S.msg=(t.out?t.name+" is out: "+t.why+". ":"Day complete. ")+(S.over?"":(S.teams.length>1?T().name+" is up: roll the die.":"Roll the die for your next turn."));
+}
+function choose(k){
+  if(!S.num||S.picked||S.over||S.num>=QUIET)return;
+  settle(CHOICES[Math.min(S.num,CHOICES.length)-1][k]);render();
+}
+function draw(t){const i=S.deck[t.dp];t.dp++;S.num=i+1;S.picked=false;S.outcome="";if(S.num>=QUIET)settle(null)}
+let rolling=false;
+$("rollBtn").onclick=()=>{
+  if(rolling||S.over||!S.started)return;
+  if(S.num&&!S.picked){S.msg="Choose an option for the current scenario first.";render();return}
+  rolling=true;
+  const iv=setInterval(()=>{$("dief").textContent=FACES[Math.floor(Math.random()*6)]},70);
+  setTimeout(()=>{clearInterval(iv);rolling=false;
+    const t=T(),n=1+Math.floor(Math.random()*6),ph=S.mode==="phys";
+    S.last=n;t.pos[t.mi]+=n;S.num=0;
+    S.title=(S.teams.length>1?t.name+" rolled a ":"You rolled a ")+n;
+    if(ph)S.msg="Move "+n+" space"+(n>1?"s":"")+" on your board, then enter the number on the card you draw.";
+    else{S.msg="Move "+n+" space"+(n>1?"s":"")+" to space "+cellOf(t.pos[t.mi])+". A card was drawn from the deck.";draw(t)}
+    render()},700);
+};
+function play(raw){
+  if(S.over||S.mode!=="phys")return;
+  const t=T(),m=String(raw||"").match(/\d+/),n=m?parseInt(m[0],10):0;
+  if(n<1||n>30){S.num=0;S.title="Unknown card";S.msg="Enter a card number from 1 to 30.";render();return}
+  if(t.used.includes(n)){S.num=0;S.title="Card already used!";S.msg="Card "+n+" was already played by "+t.name+".";render();return}
+  S.num=n;S.picked=false;S.outcome="";S.title="Card "+n;S.msg="Read the scenario, then choose how your crew responds.";if(n>=QUIET)settle(null);render();
+}
+$("goBtn").onclick=()=>{play($("code").value);$("code").value=""};
+$("code").addEventListener("keydown",e=>{if(e.key==="Enter")$("goBtn").click()});
+$("card").addEventListener("click",e=>{const b=e.target.closest("[data-c]");if(b)choose(+b.dataset.c)});
+$("teams").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-d]");if(!b||locked()||S.over)return;
+  const t=S.teams[+b.dataset.t],k=b.dataset.k;
+  t.r[k]=Math.max(0,Math.min(t.max,t.r[k]+ +b.dataset.d));render();
+});
+/* title screen, start and reset */
+function renderTitle(){
+  $("modes").innerHTML=MODES.map(([m,n,d])=>'<button class="mode" data-m="'+m+'" aria-pressed="'+(S.pick===m)+'"><b>'+n+'</b><span>'+d+'</span></button>').join("");
+  let h="";
+  if(S.pick==="phys"||S.pick==="online"){const s=S.setup;
+    h='<div class="setup"><div class="srow"><span>Teams</span>'+[1,2].map(n=>'<button data-nt="'+n+'" aria-pressed="'+(s.nt===n)+'">'+n+'</button>').join("")+'</div>';
+    for(let i=0;i<s.nt;i++)h+='<div class="srow"><span style="color:'+TC[i]+'">'+NAMES[i]+' members</span>'+[1,2,3].map(n=>'<button data-sz="'+i+':'+n+'" aria-pressed="'+(s.sizes[i]===n)+'">'+n+'</button>').join("")+'<em>starts at '+(100+20*(s.sizes[i]-1))+' per resource</em></div>';
+    h+='<p>Each member beyond the first adds +20 to every resource’s starting level and maximum.</p></div>';
+  }
+  $("setup").innerHTML=h;
+  $("startBtn").disabled=!S.pick;
+  $("contBtn").style.display=(S.started&&!S.over)?"block":"none";
+}
+$("titlescreen").addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.m)S.pick=b.dataset.m;
+  else if(b.dataset.nt)S.setup.nt=+b.dataset.nt;
+  else if(b.dataset.sz){const [i,n]=b.dataset.sz.split(":");S.setup.sizes[+i]=+n}
+  else return;
+  renderTitle();
+});
+const showPlay=()=>{$("titlescreen").style.display="none";$("play").style.display="block";window.scrollTo(0,0)};
+$("startBtn").onclick=()=>{
+  if(!S.pick)return;
+  const solo=S.pick==="solo",nt=solo?1:S.setup.nt;
+  S.mode=S.pick;
+  S.teams=Array.from({length:nt},(_,i)=>{const size=solo?1:S.setup.sizes[i],max=100+20*(size-1),r={};RES.forEach(([k])=>r[k]=max);
+    return {name:solo?"Solo crew":NAMES[i],size,max,r,day:0,used:[],dp:0,pos:[0],mi:0,out:false,why:""}});
+  S.deck=shuffle(Array.from({length:30},(_,i)=>i));
+  S.turn=0;S.started=true;S.over=false;S.winner=null;S.num=0;S.picked=true;S.last=0;S.outcome="";
+  S.title="Mission start";
+  S.msg=S.mode==="phys"?"Roll the die, move, then enter the number on the card you draw.":"Roll the die. Your piece moves and a card is drawn automatically.";
+  showPlay();render();
+};
+$("contBtn").onclick=()=>{showPlay();render()};
+function hardReset(){
+  S=Object.assign(fresh(),{setup:S.setup});
+  rt=0;$("resetBtn").textContent="New mission";
+  $("end").style.display="none";$("play").style.display="none";$("titlescreen").style.display="";
+  renderTitle();save();window.scrollTo(0,0);
+}
+let rt=0;
+$("resetBtn").onclick=()=>{
+  if(rt){clearTimeout(rt);hardReset();return}
+  $("resetBtn").textContent="Tap again to confirm: this clears the game";
+  rt=setTimeout(()=>{rt=0;$("resetBtn").textContent="New mission"},4000);
+};
+$("end").addEventListener("click",e=>{if(e.target.id==="endNew")hardReset()});
+renderTitle();
+</script>
+</body>
+</html>
