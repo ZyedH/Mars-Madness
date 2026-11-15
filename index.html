@@ -85,7 +85,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
   <header><div><h1 id="modelbl">Mars Madness</h1><div class="day"><span id="dayn">0</span><small> / 30</small></div></div><div class="num" id="whose"></div></header>
   <div class="die"><div class="dief" id="dief" aria-live="polite">⚀</div><div><button class="primary" id="rollBtn">Roll the die</button><div id="pos"></div></div></div>
   <div id="board"></div>
-  <div class="manual" id="entry"><input id="code" type="text" inputmode="numeric" placeholder="Card number (1–34)" aria-label="Card number"><button id="goBtn">Show scenario</button></div>
+  <div class="manual" id="entry"><input id="code" type="text" inputmode="numeric" placeholder="Card number (1–30)" aria-label="Card number"><button id="goBtn">Show scenario</button></div>
   <div class="status"><b id="stitle"></b><span id="smsg"></span></div>
   <div id="card"></div>
   <details class="piles" id="piles"><summary id="psum"></summary><div id="pbody"></div></details>
@@ -123,14 +123,11 @@ const CARDS=[
 "SOLAR PANELS WORKING WELL",
 "SUCCESSFUL GREENHOUSE HARVEST",
 "GOOD NEWS FROM HOME",
-"SUCCESSFUL REPAIR",
-"CLEAR SKIES",
 "ICE DISCOVERY",
 "EARTH LINK OPENS",
 "SYSTEM UPGRADE",
-"QUIET SUN",
-"CREW BIRTHDAY",
-"SAFE ASTEROID FLYBY"];
+"QUIET SUN"];
+
 const id=n=>"CARD"+String(n+1).padStart(2,"0");
 const ix=n=>n<=18?n-1:n<=22?18:n-4;
 const LESSON=[
@@ -157,14 +154,11 @@ const LESSON=[
 "InSight ran on solar panels, and its power limits shaped how often it could measure Mars weather. A good power day is a chance to catch up. When you decide, rebuild reserves before you spend them.",
 "NASA’s OSDR archive includes plant-growth experiments, because fresh food supports health and morale on long missions. When you decide, share some of a good harvest now and save some for later.",
 "NASA’s Astronomy Picture of the Day and EPIC views of Earth remind crews of home. Good news lifts morale, but the boost fades. When you decide, use good days to build resilience.",
-"InSight kept sending Mars weather for years because its team managed power and equipment carefully. Good upkeep pays off. When you decide, use a win to build a safety margin.",
-"InSight’s weather data included wind speed and direction, which crews use to pick calm windows for outdoor work. When you decide, use a clear day for jobs that are risky in bad weather.",
 "NASA’s Mars Trek mapping service lets scientists study Mars terrain, and finding water ice is a top priority for future crews. When you decide, think about what you will need most later, not only today.",
 "NASA’s DONKI database tracks the space weather that can disturb radio links, so a clear link is worth using well. When you decide, spend a good connection on what you can only get from Earth.",
 "NASA publishes open APIs so anyone can build tools from real mission data, and shared tools make crews and engineers better at their jobs. When you decide, put an upgrade where the crew is weakest.",
-"DONKI logs solar flares, and when the Sun is quiet crews can plan outdoor work with less worry about radiation. When you decide, use quiet-Sun days for work that is dangerous in a storm.",
-"NASA’s Astronomy Picture of the Day and EPIC views of Earth help crews feel connected to the world, and small traditions keep a team united. When you decide, invest in morale before it gets low.",
-"NASA’s NeoWs service tracks near-Earth asteroids and publishes their sizes and miss distances, so a safe flyby is a chance to learn. When you decide, use quiet moments to prepare for the next problem."];
+"DONKI logs solar flares, and when the Sun is quiet crews can plan outdoor work with less worry about radiation. When you decide, use quiet-Sun days for work that is dangerous in a storm."];
+
 const DESC=[
 "Weeks into the mission, small habits are starting to grate. Tools get left out, someone is always loud, and tempers are short in the cramped habitat.",
 "Low gravity is making everyone feel weaker. The exercise gear is ready, but the repair list is long and there is little spare time.",
@@ -189,14 +183,11 @@ const DESC=[
 "The dust clears and the solar panels are producing more power than planned. The crew can decide how to use the surplus.",
 "The greenhouse produces a bigger harvest than anyone expected. The crew can decide how to use it.",
 "Mission Control sends a message full of good news and notes from family and friends. Morale soars.",
-"The crew finishes a tricky repair ahead of schedule, and the habitat hums along better than before.",
-"A rare calm day on the surface: the wind is low and the sky is clear, perfect for outdoor work.",
 "A rover scan finds a patch of buried ice close to the habitat.",
 "The Earth link is clear and strong, so the crew can talk live with Mission Control.",
 "A software update from Earth makes the recycling and power systems more efficient.",
-"Forecasters report a very quiet Sun, so the crew can plan outdoor work with little radiation worry.",
-"It is a crew member’s birthday, and everyone wants to celebrate.",
-"A large asteroid passes at a safe distance, giving the crew a rare chance to watch it go by."];
+"Forecasters report a very quiet Sun, so the crew can plan outdoor work with little radiation worry."];
+
 function lessonHTML(n){return '<div class="lesson"><h3>NASA life lesson</h3><p>'+LESSON[ix(n)]+'</p></div>'}
 const CHOICES=[
 [["Hold a crew meeting and rebalance chores",{"crew":10,"safety":-5}],["Ignore it and keep working",{"safety":5,"crew":-10}],["Set up separate quiet hours",{"crew":5,"power":-5}]],
@@ -222,14 +213,10 @@ const CHOICES=[
 [["Charge the batteries",{"power":20,"crew":-5}],["Run the greenhouse lights and heaters",{"food":15,"power":-5}],["Power the air recyclers",{"oxygen":15,"power":-5}]],
 [["Store the harvest",{"food":20,"crew":-5}],["Hold a harvest feast",{"crew":20,"food":-5}],["Grow more with cuttings and compost",{"oxygen":10,"water":-5}]],
 [["Hold a crew celebration",{"crew":20,"food":-5}],["Use the energy to catch up on repairs",{"safety":15,"crew":-5}],["Rest and recover",{"crew":15,"power":-5}]],
-[["Test every system again",{"safety":15,"power":-5}],["Use the spare time to rest",{"crew":15,"safety":-5}],["Fix a second problem while the tools are out",{"power":15,"crew":-5}]],
-[["Collect ice for water",{"water":15,"safety":-5}],["Inspect the outside of the habitat",{"safety":15,"crew":-5}],["Take a walk to boost morale",{"crew":15,"power":-5}]],
 [["Melt the ice for drinking water",{"water":20,"power":-5}],["Split the ice into oxygen",{"oxygen":20,"power":-5}],["Keep it as an emergency reserve",{"water":10,"oxygen":10,"safety":-5}]],
 [["Ask experts for repair advice",{"safety":15,"crew":-5}],["Hold a video call with families",{"crew":20,"power":-5}],["Get an updated supply plan",{"food":15,"power":-5}]],
 [["Upgrade the air system",{"oxygen":15,"safety":-5}],["Upgrade the power system",{"power":15,"crew":-5}],["Upgrade the water system",{"water":15,"power":-5}]],
-[["Do long outdoor repairs",{"safety":15,"crew":-5}],["Go out to collect ice",{"water":15,"power":-5}],["Tune up the radios",{"crew":15,"food":-5}]],
-[["Throw a party",{"crew":20,"food":-5}],["Have a quiet story night",{"crew":15,"power":-5}],["Celebrate while working",{"safety":10,"food":-5}]],
-[["Watch and record it",{"crew":15,"power":-5}],["Use the quiet to run safety checks",{"safety":15,"crew":-5}],["Share the data with Earth",{"power":10,"safety":-5}]]];
+[["Do long outdoor repairs",{"safety":15,"crew":-5}],["Go out to collect ice",{"water":15,"power":-5}],["Tune up the radios",{"crew":15,"food":-5}]]];
 const TC=["#d6452d","#2f6fd6"],NAMES=["Team A","Team B"],FACES="⚀⚁⚂⚃⚄⚅";
 const MODES=[["phys","Physical board game","Use your own board and cards. The die and resources are digital."],["online","All-online","Board, cards and pieces all on screen, for one or two teams."],["solo","Solo","A game for one player with the full online board."]];
 const ICO=[
@@ -256,14 +243,10 @@ const ICO=[
 ["☀️","#b8720c"],
 ["🥬","#1f9a68"],
 ["💌","#8e5bd6"],
-["🛠️","#b8720c"],
-["🌤️","#4f86c6"],
 ["🧊","#1b8fa0"],
 ["🛰️","#148f8f"],
 ["💻","#8e5bd6"],
-["🌞","#b8720c"],
-["🎂","#8e5bd6"],
-["🔭","#148f8f"]];
+["🌞","#b8720c"]];
 const RES=[["oxygen","Oxygen","OXYGEN CRITICAL!"],["water","Water","WATER CRITICAL!"],["food","Food","FOOD CRITICAL!"],["power","Power","POWER CRITICAL!"],["safety","Safety","SAFETY CRITICAL!"],["crew","Crew health","CREW HEALTH CRITICAL!"]];
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const fresh=()=>({pick:null,setup:{nt:1,sizes:[1,1]},mode:null,started:false,over:false,winner:null,teams:[],turn:0,deck:[],num:0,picked:true,outcome:"",title:"",msg:"",last:0});
@@ -300,7 +283,7 @@ function teamHTML(t,i){
 }
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let NASA={};
-const NMAP={"POWER PROBLEMS":"sun","EARTH DOESN’T ANSWER IN AN EMERGENCY":"sun","COMMUNICATION DELAYS":"sun","EXTREME TEMPERATURES IN SPACE":"sun","SUPPLY DROP FROM EARTH":"sun","EARTH LINK OPENS":"sun","QUIET SUN":"sun","METEORITE DAMAGE":"neo","SAFE ASTEROID FLYBY":"neo","EXTREME TEMPERATURES ON MARS":"insight","SOLAR PANELS WORKING WELL":"insight","CLEAR SKIES":"insight","ALL SYSTEMS NORMAL":"apod","GOOD NEWS FROM HOME":"apod","CREW BIRTHDAY":"apod"};
+const NMAP={"POWER PROBLEMS":"sun","EARTH DOESN’T ANSWER IN AN EMERGENCY":"sun","COMMUNICATION DELAYS":"sun","EXTREME TEMPERATURES IN SPACE":"sun","SUPPLY DROP FROM EARTH":"sun","EARTH LINK OPENS":"sun","QUIET SUN":"sun","METEORITE DAMAGE":"neo","EXTREME TEMPERATURES ON MARS":"insight","SOLAR PANELS WORKING WELL":"insight","ALL SYSTEMS NORMAL":"apod","GOOD NEWS FROM HOME":"apod"};
 const frank=c=>{const m=/^([A-Z])(\d+(?:\.\d+)?)/.exec(c||"");return m?"ABCMX".indexOf(m[1])*100+parseFloat(m[2]):-1};
 function nasaBox(n){
   const d=NASA[NMAP[CARDS[n-1]]];if(!d)return"";
@@ -354,7 +337,7 @@ function nextTurn(){
   let k=S.turn,c=0;do{k=(k+1)%S.teams.length;c++}while((S.teams[k].out||S.teams[k].done)&&c<S.teams.length);
   S.turn=k;
 }
-const DRAIN=3,isQ=n=>n>=19&&n<=22;
+const DRAIN=2,isQ=n=>n>=19&&n<=22;
 function settle(o){
   const t=T();
   if(o)RES.forEach(([key])=>{const d=o[1][key];if(d)t.r[key]=Math.max(0,Math.min(t.max,t.r[key]+d))});
@@ -393,7 +376,7 @@ $("rollBtn").onclick=()=>{
 function play(raw){
   if(S.over||S.mode!=="phys")return;
   const t=T(),m=String(raw||"").match(/\d+/),n=m?parseInt(m[0],10):0;
-  if(n<1||n>34){S.num=0;S.title="Unknown card";S.msg="Enter a card number from 1 to 34.";render();return}
+  if(n<1||n>30){S.num=0;S.title="Unknown card";S.msg="Enter a card number from 1 to 30.";render();return}
   if(t.used.includes(n)){S.num=0;S.title="Card already used!";S.msg="Card "+n+" was already played by "+t.name+".";render();return}
   S.num=n;S.picked=false;S.outcome="";S.title="Card "+n;S.msg="Read the scenario, then choose how your crew responds.";if(isQ(n))settle(null);render();
 }
@@ -433,7 +416,7 @@ $("startBtn").onclick=()=>{
   S.mode=S.pick;
   S.teams=Array.from({length:nt},(_,i)=>{const size=solo?1:S.setup.sizes[i],max=100+20*(size-1),r={};RES.forEach(([k])=>r[k]=max);
     return {name:solo?"Solo crew":NAMES[i],size,max,r,day:0,used:[],dp:0,pos:[0],mi:0,out:false,done:false,why:""}});
-  S.deck=shuffle(Array.from({length:34},(_,i)=>i));
+  S.deck=shuffle(Array.from({length:30},(_,i)=>i));
   S.turn=0;S.started=true;S.over=false;S.winner=null;S.num=0;S.picked=true;S.last=0;S.outcome="";
   S.title="Mission start";
   S.msg=S.mode==="phys"?"Roll the die, move, then enter the number on the card you draw.":"Roll the die. Your piece moves and a card is drawn automatically.";
